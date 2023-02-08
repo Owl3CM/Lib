@@ -1,4 +1,3 @@
-@import "../Kit/kit.css"; 
 @import "containers.css"; 
 @import "root.css";
 @import "elements.css"; 
@@ -6,8 +5,8 @@
 @import "theme.css"; 
 @import "other.css"; 
 
-@font-face {font-family: "'BoutrosMBCDinkum Medium'";src: url('/public/fonts/light.ttf');}
-@font-face {font-family: "'GE Dinkum Medium'";src: url("/public/fonts/bold.ttf");}
+@font-face {font-family: "'BoutrosMBCDinkum Medium'";src: url('../../fonts/light.ttf');}
+@font-face {font-family: "'GE Dinkum Medium'";src: url("../../fonts/bold.ttf");}
 :root {
   /* transition: all 0.3s ease-in-out; */
 
