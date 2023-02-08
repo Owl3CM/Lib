@@ -1,3 +1,7 @@
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
 var reactExports = {};
 var react = {
   get exports(){ return reactExports; },
@@ -2801,4 +2805,15 @@ function requireReact_development () {
 	  module.exports = requireReact_development();
 	}
 } (react));
+
+var React = /*@__PURE__*/getDefaultExportFromCjs(reactExports);
+
+const Button = (props) => {
+    return (React.createElement("button", { className: 'lol-col', onClick: ({ currentTarget }) => {
+            console.log('Button clicked');
+            currentTarget.style.backgroundColor = 'red';
+        } }, props.label));
+};
+
+export { Button };
 //# sourceMappingURL=index.js.map

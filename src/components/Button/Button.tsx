@@ -4,7 +4,7 @@ interface ButtonProps {
 }
 const Button = (props: ButtonProps) => {
     return (
-        <button className='lol' onClick={({currentTarget})=>{
+        <button className='lol-col' onClick={({currentTarget})=>{
             console.log('Button clicked')
             currentTarget.style.backgroundColor = 'red'
         }}>{props.label}</button>

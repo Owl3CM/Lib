@@ -1,0 +1,101 @@
+.toggle-theme-button{
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: 333;
+  padding: var(--sm);
+  margin: -3px;
+  background-color: var(--throne);
+  border-radius: 0 0 var(--md) 0 ;
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+}
+
+a{text-decoration: none;}
+
+input[type="number"],input[type="text"],input[type="password"] {
+  color: var(--shark);
+  border-radius: var(--md);
+  box-shadow:var(--shadow-lg);
+  font-family: var(--font-bold);
+  background-color: var(--prim);
+  padding: var(--sm) var(--md);
+  font-size: var(--font-base);
+  font-weight: bold;
+  outline: none;
+  border: none;
+}
+input::placeholder {
+  color: var(--goat);
+  letter-spacing: 1px;
+  font-size: var(--base);
+  position: relative;
+  font-weight: bold;
+  z-index: 2;
+}
+input[type="number"]:focus,input[type="text"]:focus{box-shadow: var(--shadow-focus);}
+
+.button{
+  color: var(--white);
+  border-radius: var(--md);
+  padding: var(--sm) var(--md);
+  background-color: var(--dragon);
+  font-family: var(--font-bold);
+  box-shadow: var(--shadow-lg);
+  letter-spacing: 1px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+}
+
+p[state='selected']{
+  background-color: var(--penguin);
+  }
+  p[state='off']{
+  background-color: var(--goat);
+  }
+
+  .more-options-container{
+  position: absolute;
+  /* top: 40px; */
+  z-index: 999;
+  background-color: var(--prim);
+  box-shadow:var(--shadow-xl);
+  padding: var(--sm);
+  /* border: solid 2px var(--bg); */
+  gap: var(--sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.more-options-container.left{
+  /* border-radius: 0 0 var(--md) 0; */
+  border-radius: var(--md);
+  left:0px;
+}
+
+.more-option {
+  font-family:var(--font-bold);
+  font-size: var(--lg);
+  color: var(--crow);
+  padding: var(--sm) var(--md);
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+  background-color: var(--prince);
+  border-radius: var(--xs);
+}
+
+.fade-in-scale{
+  animation: fade-in-scale 0.2s ease-out;
+}
+
+@keyframes fade-in-scale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
