@@ -1,16 +1,3 @@
-/// <reference types="react" />
-type options = {
-    activeBackgound: string;
-    fontLOL: number;
-};
-interface ButtonProps {
-    label: string;
-    onClick?: (text: string) => void;
-    options?: options;
-    kebl?: number;
-}
-declare const Button: (props: ButtonProps) => JSX.Element;
-
 interface IApiServiceOptions {
     baseURL: string;
     headers?: any;
@@ -19,7 +6,7 @@ interface IApiServiceOptions {
     storageKey?: string;
     storage?: any;
 }
-declare class ApiService {
+export default class ApiService {
     storage?: any;
     storageKey?: string;
     getCleanString: any;
@@ -35,5 +22,4 @@ declare class ApiService {
     clearStorage: () => void;
     static StatusCodeByMessage: any;
 }
-
-export { ApiService, Button };
+export {};

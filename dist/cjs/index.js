@@ -2821,5 +2821,164 @@ const Button = (props) => {
         } }, props.label));
 };
 
+/******************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+class ApiService {
+    constructor({ baseURL, headers, storageKey, storage, onResponse, onError, }) {
+        this.getStored = (store_key) => JSON.parse(this.storage.getItem(this.getCleanString(store_key)));
+        this.removeStorage = (store_key) => this.storage.removeItem(this.getCleanString(store_key));
+        this.setStorage = (store_key, data) => Object.values(data).length > 0 ? this.storage.setItem(this.getCleanString(store_key), JSON.stringify(data)) : this.removeStorage(store_key);
+        this.clearStorage = () => {
+            for (let i = 0; i < this.storage.length; i++) {
+                let key = this.storage.key(i);
+                if (key.startsWith(this.storageKey))
+                    this.storage.removeItem(key);
+            }
+        };
+        this.storageKey = storageKey;
+        if (storageKey) {
+            this.storage = storage;
+            this.getCleanString = (text = "") => storageKey + text.replace(/[?&=/!]/g, "-");
+        }
+        const create = (method, api) => __awaiter(this, void 0, void 0, function* () {
+            api[method] = (endpoint, body) => {
+                const abortId = `${method}-${endpoint.includes("?") ? endpoint.split("?")[0] : endpoint}`;
+                if (api[abortId]) {
+                    console.warn("A B O R T E D \nhttps: " + baseURL.slice(6) + endpoint.split("?")[0] + "\n?" + endpoint.split("?")[1]);
+                    api[abortId].abort();
+                }
+                api[abortId] = new AbortController();
+                let _url = !endpoint || endpoint.startsWith("/") ? `${baseURL}${endpoint}` : `${baseURL}/${endpoint}`;
+                let props = { "Content-Type": "application/json", signal: api[abortId].signal, method, headers }; // mode: "no-cors",
+                if (body)
+                    props.body = JSON.stringify(body);
+                return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                    try {
+                        const res = yield fetch(_url, props);
+                        api[abortId] = null;
+                        if (res.ok) {
+                            let jsonRes = yield (res === null || res === void 0 ? void 0 : res.json());
+                            onResponse && onResponse(jsonRes);
+                            resolve(jsonRes);
+                        }
+                        else {
+                            let { bodyUsed, redirected, status, statusText, type } = res;
+                            reject(Object.assign(Object.assign({ bodyUsed }, props), { redirected,
+                                status,
+                                statusText,
+                                type, url: _url, statusMessage: ApiService.StatusCodeByMessage[status] || "Unknown Error" }));
+                        }
+                    }
+                    catch (err) {
+                        if (err.name === "AbortError")
+                            return;
+                        onError && onError(err);
+                        throw err;
+                    }
+                }));
+            };
+        });
+        this.get = (endpoint) => __awaiter(this, void 0, void 0, function* () { return yield create("get", this).then(() => this.get(endpoint)); });
+        this.post = (endpoint, body) => __awaiter(this, void 0, void 0, function* () { return yield create("post", this).then(() => this.post(endpoint, body)); });
+        this.put = (endpoint, body) => __awaiter(this, void 0, void 0, function* () { return yield create("put", this).then(() => this.put(endpoint, body)); });
+        this.delete = (endpoint) => __awaiter(this, void 0, void 0, function* () { return yield create("delete", this).then(() => this.delete(endpoint)); });
+        this.patch = (endpoint, body) => __awaiter(this, void 0, void 0, function* () { return yield create("patch", this).then(() => this.patch(endpoint, body)); });
+    }
+}
+ApiService.StatusCodeByMessage = {
+    0: "There Is No Response From Server Body Is Empty Connection May Be Very Slow",
+    100: " Continue ",
+    101: " Switching protocols ",
+    102: " Processing ",
+    103: " Early Hints ",
+    //2xx Succesful
+    200: " OK ",
+    201: " Created ",
+    202: " Accepted ",
+    203: " Non-Authoritative Information ",
+    204: " No Content ",
+    205: " Reset Content ",
+    206: " Partial Content ",
+    207: " Multi-Status ",
+    208: " Already Reported ",
+    226: " IM Used ",
+    //3xx Redirection
+    300: " Multiple Choices ",
+    301: " Moved Permanently ",
+    302: " Found (Previously 'Moved Temporarily') ",
+    303: " See Other ",
+    304: " Not Modified ",
+    305: " Use Proxy ",
+    306: " Switch Proxy ",
+    307: " Temporary Redirect ",
+    308: " Permanent Redirect ",
+    //4xx Client Error
+    400: " Bad Request ",
+    401: " Unauthorized ",
+    402: " Payment Required ",
+    403: " Forbidden ",
+    404: " Not Found ",
+    405: " Method Not Allowed ",
+    406: " Not Acceptable ",
+    407: " Proxy Authentication Required ",
+    408: " Request Timeout ",
+    409: " Conflict ",
+    410: " Gone ",
+    411: " Length Required ",
+    412: " Precondition Failed ",
+    413: " Payload Too Large ",
+    414: " URI Too Long ",
+    415: " Unsupported Media Type ",
+    416: " Range Not Satisfiable ",
+    417: " Expectation Failed ",
+    418: " I'm a Teapot ",
+    421: " Misdirected Request ",
+    422: " Unprocessable Entity ",
+    423: " Locked ",
+    424: " Failed Dependency ",
+    425: " Too Early ",
+    426: " Upgrade Required ",
+    428: " Precondition Required ",
+    429: " Too Many Requests ",
+    431: " Request Header Fields Too Large ",
+    451: " Unavailable For Legal Reasons ",
+    //5xx Server Error
+    500: " Internal Server Error ",
+    501: " Not Implemented ",
+    502: " Bad Gateway ",
+    503: " Service Unavailable ",
+    504: " Gateway Timeout ",
+    505: " HTTP Version Not Supported ",
+    506: " Variant Also Negotiates ",
+    507: " Insufficient Storage ",
+    508: " Loop Detected ",
+    510: " Not Extended ",
+    511: " Network Authentication Required ",
+};
+
+exports.ApiService = ApiService;
 exports.Button = Button;
 //# sourceMappingURL=index.js.map
