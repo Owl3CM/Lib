@@ -7,6 +7,7 @@ interface ButtonProps {
     label: string;
     onClick?: (text: string) => void;
     options?: options;
+    kebl?: number;
 }
 declare const Button: (props: ButtonProps) => JSX.Element;
 export default Button;

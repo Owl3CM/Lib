@@ -9,7 +9,8 @@ export const Service  = () => {
         <Button label="لول"  options={{
           activeBackgound: 'cyan',
           fontLOL: 15,
-        }}/>
+        }}
+        />
     </div>
   );
 };
