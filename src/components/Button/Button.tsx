@@ -4,10 +4,10 @@ interface ButtonProps {
 }
 const Button = (props: ButtonProps) => {
     return (
-        <button className='lol-col' onClick={({currentTarget})=>{
+        <p className='button' onClick={({currentTarget})=>{
             console.log('Button clicked')
             currentTarget.style.backgroundColor = 'red'
-        }}>{props.label}</button>
+        }}>{props.label}</p>
     )
 }
 export default Button
