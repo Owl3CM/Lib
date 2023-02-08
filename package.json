@@ -1,10 +1,10 @@
 {
   "name": "morabaa-lib",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "rollup -c",
+    "build": "rm -rf dist && rollup -c && yarn publish",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
