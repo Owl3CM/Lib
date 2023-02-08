@@ -1,12 +1,26 @@
 import React from 'react'
-interface ButtonProps {
-    label: string
+
+type options={
+    activeBackgound: string
+    fontLOL: number
 }
+
+interface ButtonProps {
+    label: string,
+    onClick?: (text:string ) => void,
+    options?: options
+
+}
+
+
 const Button = (props: ButtonProps) => {
     return (
-        <p className='button' onClick={({currentTarget})=>{
-            console.log('Button clicked')
-            currentTarget.style.backgroundColor = 'red'
+        <p style={{fontSize:props.options?.fontLOL}} className='button' onClick={({target}: any)=>{
+            target.style.backgroundColor = props.options?.activeBackgound
+            if(props.onClick){
+                props.onClick("Hello")
+
+            }
         }}>{props.label}</p>
     )
 }

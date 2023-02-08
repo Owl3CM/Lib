@@ -21,7 +21,7 @@ module.exports = [
                 sourcemap: true,
             },
         ],
-        plugins: [resolve(), commonjs(), typescript({ tsconfig: "./tsconfig.json" }), postcss()],
+        plugins: [resolve(), commonjs(), typescript({ tsconfig: "./tsconfig.json" }), postcss({ extract: true })],
     },
     {
         input: "dist/esm/types/index.d.ts",
