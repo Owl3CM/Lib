@@ -2809,7 +2809,10 @@ function requireReact_development () {
 var React = /*@__PURE__*/getDefaultExportFromCjs(reactExports);
 
 const Button = (props) => {
-    return (React.createElement("p", { className: 'button', onClick: () => {
+    var _a;
+    return (React.createElement("p", { style: { fontSize: (_a = props.options) === null || _a === void 0 ? void 0 : _a.fontLOL }, className: 'button', onClick: ({ target }) => {
+            var _a;
+            target.style.backgroundColor = (_a = props.options) === null || _a === void 0 ? void 0 : _a.activeBackgound;
             if (props.onClick) {
                 props.onClick("Hello");
             }

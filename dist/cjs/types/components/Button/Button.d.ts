@@ -1,6 +1,6 @@
 /// <reference types="react" />
 type options = {
-    backgroundColor: string;
+    activeBackgound: string;
     fontLOL: number;
 };
 interface ButtonProps {
