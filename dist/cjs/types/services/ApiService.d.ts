@@ -11,9 +11,9 @@ export default class ApiService {
     storageKey?: string;
     getCleanString: any;
     get: (endpoint: string) => Promise<any>;
+    delete: (endpoint: string) => Promise<any>;
     post: (endpoint: string, body: any) => Promise<any>;
     put: (endpoint: string, body: any) => Promise<any>;
-    delete: (endpoint: string) => Promise<any>;
     patch: (endpoint: string, body: any) => Promise<any>;
     constructor({ baseURL, headers, storageKey, storage, onResponse, onError, }: IApiServiceOptions);
     getStored: any;

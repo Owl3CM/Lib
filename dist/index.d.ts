@@ -24,9 +24,9 @@ declare class ApiService {
     storageKey?: string;
     getCleanString: any;
     get: (endpoint: string) => Promise<any>;
+    delete: (endpoint: string) => Promise<any>;
     post: (endpoint: string, body: any) => Promise<any>;
     put: (endpoint: string, body: any) => Promise<any>;
-    delete: (endpoint: string) => Promise<any>;
     patch: (endpoint: string, body: any) => Promise<any>;
     constructor({ baseURL, headers, storageKey, storage, onResponse, onError, }: IApiServiceOptions);
     getStored: any;
@@ -36,4 +36,52 @@ declare class ApiService {
     static StatusCodeByMessage: any;
 }
 
-export { ApiService, Button };
+interface PagenationServiceProps {
+    baseURL: string;
+    headers?: any;
+    endpoint: string;
+    onResult?: any;
+    storageKey?: string;
+    storage?: any;
+    useCash?: boolean;
+    limit?: number;
+}
+type QueryParams = {
+    [key: string]: {
+        value: any;
+        title: string;
+    };
+};
+type QueryParam = {
+    id: string;
+    value: any;
+    title: string;
+};
+declare class PagenationService extends ApiService {
+    #private;
+    items: never[];
+    setItems: (items: any) => void;
+    state: string;
+    setState: (state: any) => void;
+    offset: number;
+    limit: number;
+    query: string;
+    canFetch: boolean;
+    useCash?: boolean | undefined;
+    queryParams: QueryParams;
+    apiService: ApiService;
+    addItem: (item: any) => void;
+    updateItem: (query: any) => void;
+    onResult: (result: any, service: PagenationService) => any;
+    onError: (error: any, service: PagenationService) => void;
+    loadMore: () => Promise<void>;
+    search: () => Promise<void>;
+    reload: () => Promise<void>;
+    clearStorage: () => Promise<void>;
+    constructor({ baseURL, headers, endpoint, onResult, storageKey, storage, useCash, limit }: PagenationServiceProps);
+    initQueryParams: (values: QueryParams) => void;
+    setQueryParmas: (values: QueryParams) => void;
+    updateQueryParams: (child: QueryParam) => void;
+}
+
+export { ApiService, Button, PagenationService };

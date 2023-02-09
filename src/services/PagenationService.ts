@@ -143,7 +143,7 @@ export default class PagenationService extends ApiService{
         }
         let items:any = [];
         let _data:any= {};
-        if (typeof data === "object") {
+        if (!Array.isArray(data)) {
             Object.entries(data).forEach(([key, value]) => {
                 if (Array.isArray(value)) items = value;
                 else _data[key] = value;

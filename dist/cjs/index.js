@@ -2846,6 +2846,19 @@ function __awaiter(thisArg, _arguments, P, generator) {
     });
 }
 
+function __classPrivateFieldGet(receiver, state, kind, f) {
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
+    return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
+}
+
+function __classPrivateFieldSet(receiver, state, value, kind, f) {
+    if (kind === "m") throw new TypeError("Private method is not writable");
+    if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
+    if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
+    return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
+}
+
 class ApiService {
     constructor({ baseURL, headers, storageKey, storage, onResponse, onError, }) {
         this.getStored = (store_key) => JSON.parse(this.storage.getItem(this.getCleanString(store_key)));
@@ -2902,9 +2915,9 @@ class ApiService {
             };
         });
         this.get = (endpoint) => __awaiter(this, void 0, void 0, function* () { return yield create("get", this).then(() => this.get(endpoint)); });
+        this.delete = (endpoint) => __awaiter(this, void 0, void 0, function* () { return yield create("delete", this).then(() => this.delete(endpoint)); });
         this.post = (endpoint, body) => __awaiter(this, void 0, void 0, function* () { return yield create("post", this).then(() => this.post(endpoint, body)); });
         this.put = (endpoint, body) => __awaiter(this, void 0, void 0, function* () { return yield create("put", this).then(() => this.put(endpoint, body)); });
-        this.delete = (endpoint) => __awaiter(this, void 0, void 0, function* () { return yield create("delete", this).then(() => this.delete(endpoint)); });
         this.patch = (endpoint, body) => __awaiter(this, void 0, void 0, function* () { return yield create("patch", this).then(() => this.patch(endpoint, body)); });
     }
 }
@@ -2979,6 +2992,228 @@ ApiService.StatusCodeByMessage = {
     511: " Network Authentication Required ",
 };
 
+class Utils {
+}
+// static Round = (num) => Math.round(num * 100) / 100;
+// static getStorage = (key) => JSON.parse(localStorage.getItem(key));
+// static setStorage = (key, value) => localStorage.setItem(key, JSON.stringify(value));
+// static removeAllChildNodes(parent) {
+//     while (parent.firstChild) parent.removeChild(parent.firstChild);
+// }
+// static uuid() {
+//     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+//         var r = (Math.random() * 16) | 0,
+//             v = c == "x" ? r : (r & 0x3) | 0x8;
+//         return v.toString(16);
+//     });
+// }
+// // static hasValue = (value) => [undefined, null, -1, "", "-1"].includes(value) === false;
+// static hasValue = (value) => [undefined, null, ""].includes(value) === false;
+// static Formate = (amount) => {
+//     let newVal = `${amount}`?.replace("-", "").split("."),
+//         beforPoint = newVal[0],
+//         length = beforPoint?.length,
+//         owl = newVal[1] && !newVal[1]?.startsWith("00") ? `.${newVal[1].length > 2 ? newVal[1].substring(0, 2) : newVal[1]}` : "";
+//     for (let o = length; o > 0; o -= 3) o - 3 > 0 ? (owl = `,${beforPoint.substring(o, o - 3)}${owl}`) : (owl = beforPoint.substring(0, o) + owl);
+//     return amount >= 0 ? owl : `- ${owl}`;
+// };
+// static FormateWithCurrency = (amount, currencyId) => {
+//     let newVal = `${amount}`?.replace("-", "").split("."),
+//         beforPoint = newVal[0],
+//         length = beforPoint?.length,
+//         owl = newVal[1] && !newVal[1]?.startsWith("00") ? `.${newVal[1].length > 2 ? newVal[1].substring(0, 2) : newVal[1]}` : "";
+//     for (let o = length; o > 0; o -= 3) o - 3 > 0 ? (owl = `,${beforPoint.substring(o, o - 3)}${owl}`) : (owl = beforPoint.substring(0, o) + owl);
+//     let formated = `${owl}  ${getShortCurrency(currencyId)}`;
+//     return amount >= 0 ? formated : `${formated} -`;
+// };
+Utils.hasValue = (value) => [undefined, null, ""].includes(value) === false;
+Utils.generateQuery = (query, url) => {
+    query = Object.entries(query).reduce((acc, [id, value]) => {
+        if (Utils.hasValue(value.value))
+            acc[id] = value.value;
+        return acc;
+    }, {});
+    return `/${url}?${new URLSearchParams(query)}`;
+};
+// export const getShortCurrency = (currencyId) =>
+//     ({ undefined: "", 0: "د.ع", 1: "د.ع", 2: "$", 3: "€", 4: "£", 5: "₪", 6: "₹", 7: "₩", 8: "¥", 9: "₺", 10: "₴", 11: "₫" }[currencyId]);
+// export const AccountsStatues = {
+//     //
+//     "دائن / علينا": "Credit",
+//     "مدين / لنا": "Debt",
+//     "دائن علينا": "Credit",
+//     "مدين لنا": "Debt",
+//     "": "Debt",
+//     null: 0,
+//     undefined: 0,
+// };
+// export const ConvertStateToKey = (state) => AccountsStatues[state];
+
+var _PagenationService__init, _PagenationService_onError, _PagenationService_onResult;
+class PagenationService extends ApiService {
+    constructor({ baseURL, headers, endpoint, onResult, storageKey, storage, useCash, limit = 25 }) {
+        super({ baseURL, headers, storageKey, storage });
+        this.items = [];
+        this.setItems = (items) => { };
+        this.state = "none";
+        this.setState = (state) => { };
+        this.offset = 0;
+        this.limit = 25;
+        this.query = "";
+        this.canFetch = false;
+        // autoFetch? = false;
+        this.useCash = false;
+        this.queryParams = {};
+        this.addItem = (item) => { };
+        this.updateItem = (query) => { };
+        this.onResult = (result, service) => { return result; };
+        this.onError = (error, service) => { };
+        this.loadMore = () => __awaiter(this, void 0, void 0, function* () { });
+        this.search = () => __awaiter(this, void 0, void 0, function* () { });
+        this.reload = () => __awaiter(this, void 0, void 0, function* () { });
+        this.clearStorage = () => __awaiter(this, void 0, void 0, function* () {
+            this.apiService.clearStorage();
+            this.setItems([]);
+        });
+        _PagenationService__init.set(this, false);
+        this.initQueryParams = (values) => {
+            this.queryParams = values;
+            this.search();
+        };
+        this.setQueryParmas = (values) => {
+            this.queryParams = values;
+            this.search();
+        };
+        this.updateQueryParams = (child) => {
+            if (Utils.hasValue(child.value))
+                this.queryParams[child.id] = { value: child.value, title: child.title || "_" };
+            else
+                delete this.queryParams[child.id];
+            this.search();
+        };
+        _PagenationService_onError.set(this, (error, service) => {
+            console.log(error);
+            service.onError(error, service);
+            if (error.stack)
+                error = { message: error.message, stack: error.stack };
+            service.setState({ state: "error", error });
+        });
+        _PagenationService_onResult.set(this, (data, service) => __awaiter(this, void 0, void 0, function* () {
+            if (service.onResult) {
+                let modfied = yield service.onResult(data, service);
+                if (modfied)
+                    data = modfied;
+            }
+            let items = [];
+            if (!Array.isArray(data)) {
+                Object.entries(data).forEach(([key, value]) => {
+                    if (Array.isArray(value))
+                        items = value;
+                });
+            }
+            else
+                items = data || [];
+            if (service.useCash) {
+                const apiService = service.apiService;
+                if (service.offset === 0) {
+                    let allCashQueries = apiService.getStored("") || [];
+                    if (!allCashQueries.includes(service.query)) {
+                        allCashQueries.push(service.query);
+                        apiService.setStorage("", allCashQueries);
+                    }
+                    apiService.setStorage(service.query, items);
+                }
+                else {
+                    let oldItems = apiService.getStored(service.query) || [];
+                    apiService.setStorage(service.query, [...oldItems, ...items]);
+                }
+            }
+            if (service.offset === 0)
+                service.setItems(items);
+            else
+                service.setItems((_prev) => [..._prev, ...items]);
+            service.offset += items.length;
+            setTimeout(() => {
+                service.canFetch = !!(service.limit && items.length >= service.limit);
+            }, 100);
+            // if (service.autoFetch) {
+            //     const scroller = document.getElementById(service.scrollerId);
+            //     console.log(service.scrollerId, scroller);
+            //     setTimeout(() => {
+            //         scroller && scroller.scrollTo({ top: scroller.scrollHeight, left: 0, behavior: "auto" });
+            //     }, 100);
+            // } else 
+            service.setState(service.items.length > 0 || items.length > 0 ? "none" : "noData");
+        }));
+        this.apiService = new ApiService({ baseURL, headers, storageKey, storage, });
+        this.useCash = useCash;
+        // this.autoFetch = autoFetch;
+        this.onResult = onResult;
+        this.limit = limit;
+        this.search = () => __awaiter(this, void 0, void 0, function* () {
+            this.canFetch = false;
+            this.offset = 0;
+            if (!this.queryParams.limit && this.limit)
+                this.queryParams.limit = { value: this.limit, title: "_" };
+            this.query = Utils.generateQuery(this.queryParams, endpoint);
+            if (this.useCash) {
+                let cashItems = this.apiService.getStored(this.query);
+                if (cashItems) {
+                    if (!__classPrivateFieldGet(this, _PagenationService__init, "f")) {
+                        __classPrivateFieldSet(this, _PagenationService__init, true, "f");
+                        this.items = cashItems;
+                    }
+                    else
+                        this.setItems(cashItems);
+                    this.offset = cashItems.length;
+                    this.setState("none");
+                    setTimeout(() => {
+                        this.canFetch = true;
+                    }, 10);
+                    return;
+                }
+            }
+            this.state = "searching";
+            this.setState("searching");
+            try {
+                const result = yield this.apiService.get(this.query);
+                __classPrivateFieldGet(this, _PagenationService_onResult, "f").call(this, result, this);
+            }
+            catch (error) {
+                __classPrivateFieldGet(this, _PagenationService_onError, "f").call(this, error, this);
+            }
+        });
+        this.reload = () => __awaiter(this, void 0, void 0, function* () {
+            this.canFetch = false;
+            this.offset = 0;
+            this.query = Utils.generateQuery(this.queryParams, endpoint);
+            this.setState("reloading");
+            try {
+                const result = yield this.apiService.get(this.query);
+                this.clearStorage();
+                __classPrivateFieldGet(this, _PagenationService_onResult, "f").call(this, result, this);
+            }
+            catch (error) {
+                __classPrivateFieldGet(this, _PagenationService_onError, "f").call(this, error, this);
+            }
+        });
+        this.loadMore = () => __awaiter(this, void 0, void 0, function* () {
+            this.canFetch = false;
+            let query = this.query + `&offset=${this.offset}`;
+            this.setState("itemsLoading");
+            try {
+                const result = yield this.apiService.get(query);
+                __classPrivateFieldGet(this, _PagenationService_onResult, "f").call(this, result, this);
+            }
+            catch (error) {
+                __classPrivateFieldGet(this, _PagenationService_onError, "f").call(this, error, this);
+            }
+        });
+    }
+}
+_PagenationService__init = new WeakMap(), _PagenationService_onError = new WeakMap(), _PagenationService_onResult = new WeakMap();
+
 exports.ApiService = ApiService;
 exports.Button = Button;
+exports.PagenationService = PagenationService;
 //# sourceMappingURL=index.js.map
