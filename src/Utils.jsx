@@ -33,6 +33,13 @@ export default class Utils {
         let formated = `${owl}  ${getShortCurrency(currencyId)}`;
         return amount >= 0 ? formated : `${formated} -`;
     };
+    static generateQuery = (query, url) => {
+        query = Object.entries(query).reduce((acc, [id, value]) => {
+            if (Utils.hasValue(value.value)) acc[id] = value.value;
+            return acc;
+        }, {});
+        return `/${url}?${new URLSearchParams(query)}`;
+    };
 
     static sleep = (ms = 3000) => {
         return new Promise((resolve) => setTimeout(resolve, ms));
@@ -56,19 +63,3 @@ export default class Utils {
         };
     };
 }
-
-// export const getShortCurrency = (currencyId) =>
-//     ({ undefined: "", 0: "د.ع", 1: "د.ع", 2: "$", 3: "€", 4: "£", 5: "₪", 6: "₹", 7: "₩", 8: "¥", 9: "₺", 10: "₴", 11: "₫" }[currencyId]);
-
-// export const AccountsStatues = {
-//     //
-//     "دائن / علينا": "Credit",
-//     "مدين / لنا": "Debt",
-//     "دائن علينا": "Credit",
-//     "مدين لنا": "Debt",
-//     "": "Debt",
-//     null: 0,
-//     undefined: 0,
-// };
-
-// export const ConvertStateToKey = (state) => AccountsStatues[state];

@@ -1,7 +1,6 @@
 import './service.css';
 import React from 'react';
-import { ApiService, Button } from '../index';
-
+import { ApiService, Button  } from '../index';
 
 export const Service  = () => {
 
@@ -29,6 +28,6 @@ export const Service  = () => {
           fontLOL: 15,
         }}
         />
-    </div>
+     </div>
   );
 };

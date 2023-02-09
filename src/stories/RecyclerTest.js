@@ -1,9 +1,7 @@
 import React from "react";
-import { RecyclerList } from "../../components";
 // import RecyclerGrid, { RecyclerScroller } from "../Lib/ServiceProvider/Nodes/RecyclerScroller";
 import Utils from "../../Utils";
-import ItemNode, { ItemCard } from "./PagenatedServiceExample/ItemNode";
-import PagenationExample from "./PagenatedServiceExample/PagenationExample";
+import { RecyclerList } from "../components";
 
 const MockItemsGenerator = (count, items = []) => {
     count += items.length;
@@ -33,7 +31,7 @@ const fromApi = false;
 const RecyclerTest = () => {
     const service = React.useMemo(() => {
         const _service = fromApi
-            ? new PagenationExample()
+            ? new PagenationService()
             : {
                   items: MockItemsGenerator(1_00),
                   canFetch: true,

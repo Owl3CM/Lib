@@ -1,34 +1,25 @@
 import './service.css';
 import React from 'react';
-import { ApiService, Button, RecyclerList } from '../index';
+import { ApiService, Button, PagenationService, RecyclerList } from '../index';
 
 
 export const Recycler  = () => {
-
-//   const service=React.useMemo(()=>{
-//     return new ApiService({ baseURL : 'https://jsonplaceholder.typicode.com',storageKey:'test',storage:localStorage})
-//   },[])
-
-
+  const service=React.useMemo(()=>{
+    return new PagenationService({ baseURL : 'https://jsonplaceholder.typicode.com',storageKey:'test',storage:localStorage})
+  },[])
 
   return (
     <div className='col-center p-lg' >
         <Button label="لول"
         onClick={()=>{
-          console.log((service.get));
-          setTimeout(() => {
-            service.get('/posts/1')
-            .then((res)=>{
-              console.log((service.get));
-              console.log(res)
-            })
-          }, 1000);
+            service.search()
           }}
         options={{
           activeBackgound: 'cyan',
           fontLOL: 15,
         }}
         />
+        <RecyclerList service={service}    />
     </div>
   );
 };
