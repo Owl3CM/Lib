@@ -1,4 +1,6 @@
 /// <reference types="react" />
+import React from 'react';
+
 type options = {
     activeBackgound: string;
     fontLOL: number;
@@ -10,6 +12,40 @@ interface ButtonProps {
     kebl?: number;
 }
 declare const Button: (props: ButtonProps) => JSX.Element;
+
+interface IRecyclerScroller {
+    service: any;
+    itemBuilder: any;
+    nodeBuilder?: any;
+    viewedItems: number;
+    gridClass: string;
+    containerClass: string;
+}
+declare class RecyclerList extends React.Component {
+    useRecycler: boolean;
+    service: any;
+    Card: any;
+    buildItem: any;
+    grid: HTMLElement;
+    container: HTMLElement;
+    containerClass: string;
+    scrollerIndecator: any;
+    threshold: number;
+    viewedItems: number;
+    initItemsToCalculate: number;
+    lastItem: number;
+    lastScrollTop: number;
+    centerOfContainer: number;
+    scrollHeight: number;
+    colums: number;
+    lastPointerY: number;
+    updateIndecator: () => void;
+    onSwipeIndecator: (e: any) => void;
+    constructor({ service, itemBuilder, nodeBuilder, viewedItems, gridClass, containerClass }: IRecyclerScroller);
+    componentDidMount(): void;
+    render: () => JSX.Element;
+    handleCalculations: () => void;
+}
 
 interface IApiServiceOptions {
     baseURL: string;
@@ -84,4 +120,4 @@ declare class PagenationService extends ApiService {
     updateQueryParams: (child: QueryParam) => void;
 }
 
-export { ApiService, Button, PagenationService };
+export { ApiService, Button, PagenationService, RecyclerList };

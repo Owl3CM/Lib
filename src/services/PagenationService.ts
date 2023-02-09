@@ -1,5 +1,5 @@
 import ApiService from "./ApiService";
-import Utils from "./Utils";
+const Utils = require("../Utils");
 
 
 interface PagenationServiceProps {

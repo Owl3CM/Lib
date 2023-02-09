@@ -13,7 +13,6 @@ interface ButtonProps {
 
 }
 
-
 const Button = (props: ButtonProps) => {
     return (
         <p style={{fontSize:props.options?.fontLOL,padding:props.kebl}} className='button' onClick={({target}: any)=>{
@@ -26,4 +25,3 @@ const Button = (props: ButtonProps) => {
     )
 }
 export default Button
-

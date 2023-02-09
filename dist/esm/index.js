@@ -2819,6 +2819,181 @@ const Button = (props) => {
         } }, props.label));
 };
 
+class RecyclerList extends React.Component {
+    constructor({ service, itemBuilder, nodeBuilder, viewedItems = 25, gridClass = "grid", containerClass = "wrapper relative" }) {
+        super({});
+        this.grid = document.createElement("div");
+        this.container = document.createElement("div");
+        this.threshold = 200;
+        this.viewedItems = 0;
+        this.initItemsToCalculate = 0;
+        this.lastItem = 0;
+        this.lastScrollTop = 0;
+        this.centerOfContainer = 0;
+        this.scrollHeight = 0;
+        this.colums = 0;
+        this.lastPointerY = 0;
+        this.updateIndecator = () => { };
+        this.onSwipeIndecator = (e) => { };
+        this.render = () => (React.createElement("div", { className: this.containerClass },
+            React.createElement("p", { onClick: () => {
+                    this.useRecycler = !this.useRecycler;
+                    localStorage.setItem("useRecycler", this.useRecycler ? "Enable Recycler" : "Disable Recycler");
+                    window.location.reload();
+                }, className: "button fixed z-50" }, this.useRecycler ? "Disable Recycler" : "Enable Recycler"),
+            this.useRecycler ? (React.createElement("div", { id: "recycler", className: "wrapper relative hide-scroller py-5xl" })) : (React.createElement("div", { className: this.containerClass },
+                React.createElement("div", { className: "grid", style: { paddingBottom: "200px" } }, this.service.items.map((item, i) => (React.createElement(this.Card, { key: i, item: item }))))))));
+        this.handleCalculations = () => {
+            var _a;
+            this.colums = Math.floor(this.container.offsetWidth / (((_a = this.grid.querySelector(".first-child")) === null || _a === void 0 ? void 0 : _a.offsetWidth) || 0));
+            this.viewedItems = Math.floor(this.viewedItems / this.colums) * this.colums;
+            this.scrollHeight = this.container.scrollHeight - this.container.offsetHeight;
+            this.centerOfContainer = this.scrollHeight / 2;
+            this.lastItem = this.viewedItems;
+        };
+        this.useRecycler = localStorage.getItem("useRecycler") !== "Disable Recycler";
+        this.service = service;
+        this.Card = itemBuilder;
+        this.containerClass = containerClass;
+        if (!this.useRecycler)
+            return;
+        this.viewedItems = viewedItems;
+        this.initItemsToCalculate = 10;
+        this.buildItem = nodeBuilder ? ({ item, i }) => nodeBuilder({ item, i }) : ({ item, i }) => convertToNode(itemBuilder, item);
+        this.grid.className = gridClass;
+        this.grid.append(service.items.slice(0, this.initItemsToCalculate).map((item, i) => this.buildItem({ item, i })));
+    }
+    componentDidMount() {
+        if (!this.useRecycler)
+            return;
+        this.container = document.querySelector("#recycler");
+        this.container.append(this.grid);
+        this.handleCalculations();
+        this.grid.append(...this.service.items.slice(this.initItemsToCalculate, this.viewedItems).map((item, i) => this.buildItem({ item, i })));
+        this.handleCalculations();
+        this.scrollerIndecator = createIndecator(this);
+        this.container.parentElement.append(this.scrollerIndecator);
+        this.container.addEventListener("scroll", ({ target }) => recyclingOnScroll(target, this));
+        window.addEventListener("resize", this.handleCalculations);
+    }
+}
+const recyclingOnScroll = (target, recycler) => {
+    const scrollDown = target.scrollTop >= recycler.lastScrollTop;
+    recycler.lastScrollTop = target.scrollTop;
+    recycler.updateIndecator();
+    if (target.scrollTop > recycler.centerOfContainer + recycler.threshold) {
+        if (scrollDown) {
+            if (recycler.lastItem + recycler.colums >= recycler.service.items.length) {
+                if (!recycler.service.canFetch)
+                    return;
+                recycler.service.loadMore().then(() => {
+                    setTimeout(() => onScrollDown(recycler), 10);
+                    const height = ((40 ) / recycler.service.items.length) * 1000;
+                    recycler.scrollerIndecator.style.height = `${height < 40 ? 40 : height}px`;
+                });
+                return;
+            }
+            onScrollDown(recycler);
+        }
+    }
+    else if (target.scrollTop < recycler.centerOfContainer - recycler.threshold) {
+        if (!scrollDown) {
+            if (recycler.lastItem <= recycler.viewedItems)
+                return;
+            onScrollUp(recycler);
+            if (target.scrollTop < 1)
+                setTimeout(() => (target.scrollTop = 10), 5);
+        }
+    }
+};
+const onScrollDown = (recycler) => {
+    var _a;
+    let start = recycler.lastItem;
+    recycler.lastItem += recycler.colums;
+    let array = recycler.service.items.slice(start, recycler.lastItem);
+    for (let i = 0; i < array.length; i++) {
+        let itemNode = recycler.buildItem({ item: array[i], setItem: recycler.service.setItem });
+        (_a = recycler.grid.firstChild) === null || _a === void 0 ? void 0 : _a.remove();
+        recycler.grid.append(itemNode);
+    }
+};
+const onScrollUp = (recycler) => {
+    var _a;
+    recycler.lastItem -= recycler.colums;
+    let end = recycler.lastItem - recycler.viewedItems;
+    let start = end + recycler.colums;
+    let array = recycler.service.items.slice(end, start);
+    for (let i = array.length - 1; i > -1; i--) {
+        let itemNode = recycler.buildItem({ item: array[i], setItem: recycler.service.setItem });
+        (_a = recycler.grid.lastChild) === null || _a === void 0 ? void 0 : _a.remove();
+        recycler.grid.prepend(itemNode);
+    }
+};
+const createIndecator = (recycler) => {
+    const scrollerIndecator = document.createElement("p");
+    scrollerIndecator.className = "scroller-indecator";
+    const height = ((40 ) / recycler.service.items.length) * 1000;
+    scrollerIndecator.style.height = `${height < 40 ? 40 : height}px`;
+    recycler.updateIndecator = () => {
+        scrollerIndecator.style.top = `${((recycler.lastItem - recycler.viewedItems + recycler.colums) / recycler.service.items.length) * recycler.container.offsetHeight}px`;
+    };
+    recycler.onSwipeIndecator = (e) => {
+        const scrollDown = e.clientY > recycler.lastPointerY;
+        recycler.lastPointerY = e.clientY;
+        const lastIndex = (e.clientY / recycler.container.offsetHeight) * recycler.service.items.length;
+        if (lastIndex < recycler.viewedItems || lastIndex > recycler.service.items.length)
+            return;
+        recycler.lastItem = lastIndex - (lastIndex % recycler.colums);
+        if (scrollDown) {
+            onScrollDown(recycler);
+            recycler.container.scrollTop = recycler.scrollHeight;
+        }
+        else {
+            onScrollUp(recycler);
+            recycler.container.scrollTop = 0;
+        }
+        recycler.updateIndecator();
+    };
+    scrollerIndecator.addEventListener("mousedown", (e) => {
+        recycler.lastPointerY = e.clientY;
+        const mouseUp = () => {
+            console.log(recycler.lastItem);
+            recycler.grid.replaceChildren(...recycler.service.items.slice(recycler.lastItem - recycler.viewedItems, recycler.lastItem).map((item, i) => recycler.buildItem({ item, i })));
+            recycler.container.scrollTop = recycler.container.scrollTop > recycler.centerOfContainer ? recycler.container.scrollHeight : 0;
+            window.removeEventListener("mousemove", recycler.onSwipeIndecator);
+            window.removeEventListener("mouseup", mouseUp);
+        };
+        window.addEventListener("mousemove", recycler.onSwipeIndecator);
+        window.addEventListener("mouseup", mouseUp);
+    });
+    return scrollerIndecator;
+};
+// const observe = new IntersectionObserver(
+//     (entries) => entries.forEach((entry) => (entry.isIntersecting ? entry.target.classList.add("intersecting") : entry.target.classList.remove("intersecting")))
+//     // ,{ threshold: 1, root: document.getElementById("recycler"), rootMargin: "0px" }
+// );
+const convertToNode = (node, item) => create(node({ item, i: 0 }));
+const create = (reactComponent) => {
+    const element = document.createElement(reactComponent.type);
+    Object.entries(reactComponent.props).map(([key, value]) => {
+        if (key === "children")
+            return;
+        if (key !== "className")
+            key = key.toLocaleLowerCase();
+        if (key === "style")
+            return Object.entries(value).map(([styleKey, styleValue]) => (element.style[styleKey] = styleValue));
+        element[key] = value;
+    });
+    if (typeof reactComponent.props.children === "object") {
+        Array.isArray(reactComponent.props.children)
+            ? Object.values(reactComponent.props.children).forEach((nestedChild) => element.append(create(nestedChild)))
+            : element.append(create(reactComponent.props.children));
+    }
+    else
+        element.append(reactComponent.props.children);
+    return element;
+};
+
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
 
@@ -2990,64 +3165,8 @@ ApiService.StatusCodeByMessage = {
     511: " Network Authentication Required ",
 };
 
-class Utils {
-}
-// static Round = (num) => Math.round(num * 100) / 100;
-// static getStorage = (key) => JSON.parse(localStorage.getItem(key));
-// static setStorage = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-// static removeAllChildNodes(parent) {
-//     while (parent.firstChild) parent.removeChild(parent.firstChild);
-// }
-// static uuid() {
-//     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-//         var r = (Math.random() * 16) | 0,
-//             v = c == "x" ? r : (r & 0x3) | 0x8;
-//         return v.toString(16);
-//     });
-// }
-// // static hasValue = (value) => [undefined, null, -1, "", "-1"].includes(value) === false;
-// static hasValue = (value) => [undefined, null, ""].includes(value) === false;
-// static Formate = (amount) => {
-//     let newVal = `${amount}`?.replace("-", "").split("."),
-//         beforPoint = newVal[0],
-//         length = beforPoint?.length,
-//         owl = newVal[1] && !newVal[1]?.startsWith("00") ? `.${newVal[1].length > 2 ? newVal[1].substring(0, 2) : newVal[1]}` : "";
-//     for (let o = length; o > 0; o -= 3) o - 3 > 0 ? (owl = `,${beforPoint.substring(o, o - 3)}${owl}`) : (owl = beforPoint.substring(0, o) + owl);
-//     return amount >= 0 ? owl : `- ${owl}`;
-// };
-// static FormateWithCurrency = (amount, currencyId) => {
-//     let newVal = `${amount}`?.replace("-", "").split("."),
-//         beforPoint = newVal[0],
-//         length = beforPoint?.length,
-//         owl = newVal[1] && !newVal[1]?.startsWith("00") ? `.${newVal[1].length > 2 ? newVal[1].substring(0, 2) : newVal[1]}` : "";
-//     for (let o = length; o > 0; o -= 3) o - 3 > 0 ? (owl = `,${beforPoint.substring(o, o - 3)}${owl}`) : (owl = beforPoint.substring(0, o) + owl);
-//     let formated = `${owl}  ${getShortCurrency(currencyId)}`;
-//     return amount >= 0 ? formated : `${formated} -`;
-// };
-Utils.hasValue = (value) => [undefined, null, ""].includes(value) === false;
-Utils.generateQuery = (query, url) => {
-    query = Object.entries(query).reduce((acc, [id, value]) => {
-        if (Utils.hasValue(value.value))
-            acc[id] = value.value;
-        return acc;
-    }, {});
-    return `/${url}?${new URLSearchParams(query)}`;
-};
-// export const getShortCurrency = (currencyId) =>
-//     ({ undefined: "", 0: "د.ع", 1: "د.ع", 2: "$", 3: "€", 4: "£", 5: "₪", 6: "₹", 7: "₩", 8: "¥", 9: "₺", 10: "₴", 11: "₫" }[currencyId]);
-// export const AccountsStatues = {
-//     //
-//     "دائن / علينا": "Credit",
-//     "مدين / لنا": "Debt",
-//     "دائن علينا": "Credit",
-//     "مدين لنا": "Debt",
-//     "": "Debt",
-//     null: 0,
-//     undefined: 0,
-// };
-// export const ConvertStateToKey = (state) => AccountsStatues[state];
-
 var _PagenationService__init, _PagenationService_onError, _PagenationService_onResult;
+const Utils = require("./Utils");
 class PagenationService extends ApiService {
     constructor({ baseURL, headers, endpoint, onResult, storageKey, storage, useCash, limit = 25 }) {
         super({ baseURL, headers, storageKey, storage });
@@ -3211,5 +3330,5 @@ class PagenationService extends ApiService {
 }
 _PagenationService__init = new WeakMap(), _PagenationService_onError = new WeakMap(), _PagenationService_onResult = new WeakMap();
 
-export { ApiService, Button, PagenationService };
+export { ApiService, Button, PagenationService, RecyclerList };
 //# sourceMappingURL=index.js.map
