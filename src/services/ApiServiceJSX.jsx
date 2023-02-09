@@ -1,45 +1,26 @@
-interface IApiServiceOptions {
-    baseURL: string;
-    headers?: any;
-    onResponse?: (res: any) => void;
-    onError?: (err: any) => void;
-    storageKey?: string;
-    storage?:any ;
-}
-
-export default class ApiService {
-    storage?:any
-    storageKey?:string;
-    getCleanString:any
-    
-    get: (endpoint: string) => Promise<any>;
-    delete : (endpoint: string) => Promise<any>;
-    post : (endpoint: string, body: any) => Promise<any>;
-    put : (endpoint: string, body: any) => Promise<any>;
-    patch: (endpoint: string, body: any) => Promise<any>;
-    
-    constructor({ baseURL, headers, storageKey, storage, onResponse, onError,} :IApiServiceOptions) {
+export default class ApiServiceJSX {
+    constructor({ baseURL, headers, onResponse, onError, storageKey, storageType = "session" }) {
         this.storageKey = storageKey;
         if (storageKey) {
-            this.storage = storage;
+            this.storage = window[storageType + "Storage"];
             this.getCleanString = (text = "") => storageKey + text.replace(/[?&=/!]/g, "-");
         }
 
-        const create = async (method:string,api:any) => {
-            api[method] = (endpoint:string, body:any) => {
+        const create = async (method) => {
+            this[method] = (endpoint, body) => {
                 const abortId = `${method}-${endpoint.includes("?") ? endpoint.split("?")[0] : endpoint}`;
-                if (api[abortId]) {
+                if (this[abortId]) {
                     console.warn("A B O R T E D \nhttps: " + baseURL.slice(6) + endpoint.split("?")[0] + "\n?" + endpoint.split("?")[1]);
-                    api[abortId].abort();
+                    this[abortId].abort();
                 }
-                api[abortId] = new AbortController();
+                this[abortId] = new AbortController();
                 let _url = !endpoint || endpoint.startsWith("/") ? `${baseURL}${endpoint}` : `${baseURL}/${endpoint}`;
-                let props :any= { "Content-Type": "application/json", signal: api[abortId].signal, method, headers }; // mode: "no-cors",
+                let props = { "Content-Type": "application/json", signal: this[abortId].signal, method, headers }; // mode: "no-cors",
                 if (body) props.body = JSON.stringify(body);
                 return new Promise(async (resolve, reject) => {
                     try {
                         const res = await fetch(_url, props);
-                        api[abortId] = null;
+                    this[abortId] = null;
                         if (res.ok) {
                             let jsonRes = await res?.json();
                             onResponse && onResponse(jsonRes);
@@ -54,10 +35,10 @@ export default class ApiService {
                                 statusText,
                                 type,
                                 url: _url,
-                                statusMessage: ApiService.StatusCodeByMessage[status] || "Unknown Error",
+                                statusMessage: ApiServiceJSX.StatusCodeByMessage[status] || "Unknown Error",
                             });
                         }
-                    } catch (err:any) {
+                    } catch (err) {
                         if (err.name === "AbortError") return;
                         onError && onError(err);
                         throw err;
@@ -65,17 +46,16 @@ export default class ApiService {
                 });
             };
         };
-        this.get=async(endpoint:string)=>await create("get",this).then(()=>this.get(endpoint))
-        this.delete=async(endpoint:string)=>await create("delete",this).then(()=>this.delete(endpoint))
-        this.post=async(endpoint:string,body:any)=>await create("post",this).then(()=>this.post(endpoint,body))
-        this.put=async(endpoint:string,body:any)=>await create("put",this).then(()=>this.put(endpoint,body))
-        this.patch=async(endpoint:string,body:any)=>await create("patch",this).then(()=>this.patch(endpoint,body))
+        this.get=async(endpoint)=>await create("get",this).then(()=>this.get(endpoint))
+        this.post=async(endpoint,body)=>await create("post",this).then(()=>this.post(endpoint,body))
+        this.put=async(endpoint,body)=>await create("put",this).then(()=>this.put(endpoint,body))
+        this.delete=async(endpoint)=>await create("delete",this).then(()=>this.delete(endpoint))
+        this.patch=async(endpoint,body)=>await create("patch",this).then(()=>this.patch(endpoint,body))
     }
-  
-   
-    getStored:any = (store_key:string) => JSON.parse(this.storage.getItem(this.getCleanString(store_key)));
-    removeStorage = (store_key:string) => this.storage.removeItem(this.getCleanString(store_key));
-    setStorage = (store_key:string, data:any) =>
+
+    getStored = (store_key) => JSON.parse(this.storage.getItem(this.getCleanString(store_key)));
+    removeStorage = (store_key) => this.storage.removeItem(this.getCleanString(store_key));
+    setStorage = (store_key, data) =>
         Object.values(data).length > 0 ? this.storage.setItem(this.getCleanString(store_key), JSON.stringify(data)) : this.removeStorage(store_key);
 
     clearStorage = () => {
@@ -84,9 +64,8 @@ export default class ApiService {
             if (key.startsWith(this.storageKey)) this.storage.removeItem(key);
         }
     };
- 
 
-    static StatusCodeByMessage:any = {
+    static StatusCodeByMessage = {
         0: "There Is No Response From Server Body Is Empty Connection May Be Very Slow",
 
         100: " Continue ",

@@ -9,11 +9,13 @@ interface PagenationServiceProps {
     onResult?:any,
     storageKey?:string,
     storage?:any,
-    autoFetch?:boolean,
+    // autoFetch?:boolean,
     useCash?:boolean,
     limit?:number
 }
-
+type PagenationServiceState = "none" | "searching" | "reloading" | "itemsLoading" | "error";
+type QueryParams = { [key: string]: { value: any; title: string } };
+type QueryParam = { id: string; value: any; title: string };
 export default class PagenationService extends ApiService{
     items = [];
     setItems = (items:any) => {};
@@ -24,15 +26,15 @@ export default class PagenationService extends ApiService{
     limit = 25;
     query = "";
     canFetch = false;
-    autoFetch? = false;
+    // autoFetch? = false;
     useCash? = false;
-    queryParams:any = {};
+    queryParams:QueryParams = {};
     
-    apiService:any;
+    apiService:ApiService;
     addItem = (item:any) => {};
     updateItem = (query:any) => {};
-    onResult = (result:any, service:any) => {};
-    onError = (error:any, service:any) => {};
+    onResult = (result:any, service:PagenationService)  => {return result};
+    onError = (error:any, service:PagenationService) => {};
     
     loadMore = async () => {};
     search = async () => {};
@@ -46,16 +48,11 @@ export default class PagenationService extends ApiService{
     
     #_init = false;
     
-    constructor({ baseURL, headers, endpoint, onResult, storageKey, storage, autoFetch, useCash, limit = 25 }: PagenationServiceProps) {
+    constructor({ baseURL, headers, endpoint, onResult, storageKey, storage,  useCash, limit = 25 }: PagenationServiceProps) {
         super({ baseURL, headers, storageKey, storage });
-        this.apiService = new ApiService({
-            baseURL,
-            headers,
-            storageKey,
-            storage,
-        });
+        this.apiService = new ApiService({baseURL,headers,storageKey,storage,});
         this.useCash = useCash;
-        this.autoFetch = autoFetch;
+        // this.autoFetch = autoFetch;
         this.onResult = onResult;
         this.limit = limit;
 
@@ -118,15 +115,15 @@ export default class PagenationService extends ApiService{
         };
     }
 
-    initQueryParams = (values:any) => {
+    initQueryParams = (values:QueryParams) => {
         this.queryParams = values;
         this.search();
     };
-    setQueryParmas = (values:any) => {
+    setQueryParmas = (values:QueryParams) => {
         this.queryParams = values;
         this.search();
     };
-    updateQueryParams = (child:any) => {
+    updateQueryParams = (child:QueryParam) => {
         if (Utils.hasValue(child.value)) this.queryParams[child.id] = { value: child.value, title: child.title || "_" };
         else delete this.queryParams[child.id];
         this.search();
@@ -139,7 +136,7 @@ export default class PagenationService extends ApiService{
         service.setState({ state: "error", error });
     };
 
-    #onResult = async (data:any, service:any) => {
+    #onResult = async (data:any, service:PagenationService) => {
         if (service.onResult) {
             let modfied = await service.onResult(data, service);
             if (modfied) data = modfied;
@@ -174,16 +171,17 @@ export default class PagenationService extends ApiService{
         service.offset += items.length;
 
         setTimeout(() => {
-            service.canFetch = service.limit && items.length >= service.limit;
+            service.canFetch = !!(service.limit && items.length >= service.limit) ;
         }, 100);
 
-        if (service.autoFetch) {
-            const scroller = document.getElementById(service.scrollerId);
-            console.log(service.scrollerId, scroller);
-            setTimeout(() => {
-                scroller && scroller.scrollTo({ top: scroller.scrollHeight, left: 0, behavior: "auto" });
-            }, 100);
-        } else service.setState(service.items.length > 0 || items.length > 0 ? "none" : "noData");
+        // if (service.autoFetch) {
+        //     const scroller = document.getElementById(service.scrollerId);
+        //     console.log(service.scrollerId, scroller);
+        //     setTimeout(() => {
+        //         scroller && scroller.scrollTo({ top: scroller.scrollHeight, left: 0, behavior: "auto" });
+        //     }, 100);
+        // } else 
+        service.setState(service.items.length > 0 || items.length > 0 ? "none" : "noData");
     };
 }
 
