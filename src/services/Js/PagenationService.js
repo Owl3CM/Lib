@@ -1,58 +1,40 @@
 import ApiService from "./ApiService";
-const Utils = require("../Utils");
 
-
-interface PagenationServiceProps {
-    baseURL:string,
-    headers?:any,
-    endpoint:string,
-    onResult?:any,
-    storageKey?:string,
-    storage?:any,
-    // autoFetch?:boolean,
-    useCash?:boolean,
-    limit?:number
-}
-type PagenationServiceState = "none" | "searching" | "reloading" | "itemsLoading" | "error";
-type QueryParams = { [key: string]: { value: any; title: string } };
-type QueryParam = { id: string; value: any; title: string };
-export default class PagenationService extends ApiService{
+export default class PagenationService {
     items = [];
-    setItems = (items:any) => {};
+    setItems = (items) => {};
     state = "none";
-    setState = (state:any) => {};
-    
+    setState = (state) => {};
+
     offset = 0;
     limit = 25;
     query = "";
     canFetch = false;
-    // autoFetch? = false;
-    useCash? = false;
-    queryParams:QueryParams = {};
-    
-    apiService:ApiService;
-    addItem = (item:any) => {};
-    updateItem = (query:any) => {};
-    onResult = (result:any, service:PagenationService)  => {return result};
-    onError = (error:any, service:PagenationService) => {};
-    
+    autoFetch = false;
+    useCash = false;
+    queryParams = {};
+
+    addItem = (item) => {};
+    updateItem = (query) => {};
+
     loadMore = async () => {};
     search = async () => {};
     reload = async () => {};
-    
     clearStorage = async () => {
         this.apiService.clearStorage();
         this.setItems([]);
     };
-    
-    
     #_init = false;
-    
-    constructor({ baseURL, headers, endpoint, onResult, storageKey, storage,  useCash, limit = 25 }: PagenationServiceProps) {
-        super({ baseURL, headers, storageKey, storage });
-        this.apiService = new ApiService({baseURL,headers,storageKey,storage,});
+
+    constructor({ baseURL, headers, endpoint, onResult, storageKey, storageType, autoFetch, useCash, limit = 25 }) {
+        this.apiService = new ApiService({
+            baseURL,
+            headers,
+            storageKey,
+            storageType,
+        });
         this.useCash = useCash;
-        // this.autoFetch = autoFetch;
+        this.autoFetch = autoFetch;
         this.onResult = onResult;
         this.limit = limit;
 
@@ -60,8 +42,6 @@ export default class PagenationService extends ApiService{
             this.canFetch = false;
             this.offset = 0;
             if (!this.queryParams.limit && this.limit) this.queryParams.limit = { value: this.limit, title: "_" };
-
-            this.query = Utils.generateQuery(this.queryParams, endpoint);
 
             if (this.useCash) {
                 let cashItems = this.apiService.getStored(this.query);
@@ -91,7 +71,6 @@ export default class PagenationService extends ApiService{
         this.reload = async () => {
             this.canFetch = false;
             this.offset = 0;
-            this.query = Utils.generateQuery(this.queryParams, endpoint);
             this.setState("reloading");
             try {
                 const result = await this.apiService.get(this.query);
@@ -113,37 +92,76 @@ export default class PagenationService extends ApiService{
                 this.#onError(error, this);
             }
         };
+        // this.addScrollEvent(scrollerId);
     }
 
-    initQueryParams = (values:QueryParams) => {
-        this.queryParams = values;
-        this.search();
-    };
-    setQueryParmas = (values:QueryParams) => {
-        this.queryParams = values;
-        this.search();
-    };
-    updateQueryParams = (child:QueryParam) => {
-        if (Utils.hasValue(child.value)) this.queryParams[child.id] = { value: child.value, title: child.title || "_" };
-        else delete this.queryParams[child.id];
-        this.search();
-    };
+    // this.queryParams = {};
 
-    #onError = (error:any, service:PagenationService) => {
+    // this.setHeader = (header) => {
+    //     this.setHeaderState &&
+    //         this.setHeaderState((_prev) => {
+    //             let _newHeader = { ..._prev, ...header };
+    //             if (this.useCash) {
+    //                 this.setStorage("-header", _newHeader);
+    //             }
+    //             return _newHeader;
+    //         });
+    // };
+
+    // if (onQueryChanged) {
+    //     this.setQueryParmas = async (values) => {
+    //         this.queryParams = values;
+    //         let header = this.getStored("-header");
+    //         if (header) {
+    //             this.header = header;
+    //         } else {
+    //             setTimeout(() => {
+    //                 this.setHeader(onQueryChanged(this, values, true));
+    //             }, 1);
+    //         }
+    //         this.search(true);
+    //     };
+    //     this.updateQueryParams = (child) => {
+    //         else delete this.queryParams[child.id];
+    //         onQueryChanged(this, { [child.id]: child });
+    //         this.search();
+    //     };
+    // } else {
+    // if (this.useCash)
+    //     setTimeout(() => {
+    //         let header = this.getStored("-header");
+    //         this.setHeader(header);
+    //     }, 1);
+
+    initQueryParams = (values) => {
+        this.queryParams = values;
+        this.search();
+    };
+    setQueryParmas = (values) => {
+        this.queryParams = values;
+        this.search();
+    };
+    updateQueryParams = (child) => {
+        this.updageHeader && this.updageHeader();
+        this.search();
+    };
+    // }
+
+    #onError = (error, service) => {
         console.log(error);
-        service.onError(error,service);
+        service.onError && service.onError(error);
         if (error.stack) error = { message: error.message, stack: error.stack };
         service.setState({ state: "error", error });
     };
 
-    #onResult = async (data:any, service:PagenationService) => {
+    #onResult = async (data, service) => {
         if (service.onResult) {
             let modfied = await service.onResult(data, service);
             if (modfied) data = modfied;
         }
-        let items:any = [];
-        let _data:any= {};
-        if (!Array.isArray(data)) {
+        let items = [];
+        let _data = {};
+        if (getType(data) === "Object") {
             Object.entries(data).forEach(([key, value]) => {
                 if (Array.isArray(value)) items = value;
                 else _data[key] = value;
@@ -166,22 +184,39 @@ export default class PagenationService extends ApiService{
         }
 
         if (service.offset === 0) service.setItems(items);
-        else service.setItems((_prev:any) => [..._prev, ...items]);
+        else service.setItems((_prev) => [..._prev, ...items]);
 
         service.offset += items.length;
 
         setTimeout(() => {
-            service.canFetch = !!(service.limit && items.length >= service.limit) ;
+            service.canFetch = service.limit && items.length >= service.limit;
         }, 100);
 
-        // if (service.autoFetch) {
-        //     const scroller = document.getElementById(service.scrollerId);
-        //     console.log(service.scrollerId, scroller);
-        //     setTimeout(() => {
-        //         scroller && scroller.scrollTo({ top: scroller.scrollHeight, left: 0, behavior: "auto" });
-        //     }, 100);
-        // } else 
-        service.setState(service.items.length > 0 || items.length > 0 ? "none" : "noData");
+        if (service.autoFetch) {
+            const scroller = document.getElementById(service.scrollerId);
+            console.log(service.scrollerId, scroller);
+            setTimeout(() => {
+                scroller && scroller.scrollTo({ top: scroller.scrollHeight, left: 0, behavior: "auto" });
+            }, 100);
+        } else service.setState(service.items.length > 0 || items.length > 0 ? "none" : "noData");
     };
+
+    // addScrollEvent(scrollerId) {
+    //     setTimeout(() => {
+    //         let scroller = document.getElementById(scrollerId);
+    //         if (this.limit !== 0)
+    //             scroller.addEventListener(
+    //                 "scroll",
+    //                 ({ target }) => {
+    //                     if (this.canFetch && target.scrollHeight - target.scrollTop < target.clientHeight + 400) {
+    //                         this.canFetch = false;
+    //                         this.loadMore();
+    //                     }
+    //                 },
+    //                 { passive: true }
+    //             );
+    //     }, 100);
+    // }
 }
 
+const getType = (obj) => Object.prototype.toString.call(obj).slice(8, -1);

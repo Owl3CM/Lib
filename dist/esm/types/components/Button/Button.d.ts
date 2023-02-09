@@ -1,4 +1,4 @@
-/// <reference types="react" />
+import React from 'react';
 type options = {
     activeBackgound: string;
     fontLOL: number;
@@ -9,5 +9,7 @@ interface ButtonProps {
     options?: options;
     kebl?: number;
 }
-declare const Button: (props: ButtonProps) => JSX.Element;
-export default Button;
+export default class Button extends React.Component<ButtonProps> {
+    render(): JSX.Element;
+}
+export {};

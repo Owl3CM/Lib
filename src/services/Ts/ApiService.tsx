@@ -18,7 +18,7 @@ export default class ApiService {
     put : (endpoint: string, body: any) => Promise<any>;
     patch: (endpoint: string, body: any) => Promise<any>;
     
-    constructor({ baseURL, headers, storageKey, storage, onResponse, onError,} :IApiServiceOptions) {
+    constructor({ baseURL, headers, storageKey, storage=localStorage, onResponse, onError,} :IApiServiceOptions) {
         this.storageKey = storageKey;
         if (storageKey) {
             this.storage = storage;

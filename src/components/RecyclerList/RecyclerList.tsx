@@ -9,13 +9,12 @@ interface IRecyclerScroller {
     containerClass: string;
 }
 
-
-export default class RecyclerList extends React.Component {
+export default class RecyclerList extends React.Component<IRecyclerScroller> {
     useRecycler: boolean;
     service: any;
     Card: any;
     buildItem: any;
-    grid:HTMLElement= document.createElement("div");
+    grid:HTMLElement|any= document.createElement("div");
     container:HTMLElement= document.createElement("div");
     containerClass: string;
     scrollerIndecator: any;
@@ -30,9 +29,31 @@ export default class RecyclerList extends React.Component {
     lastPointerY= 0;
     updateIndecator=()=>{};
     onSwipeIndecator = (e:any) =>{}
+    // getNodes=(firstIndex:any,lastIndex:any):any=>{}
     
+    getNodes = (firstItem =0,lastItem =this.lastItem) => this.service.items.slice(firstItem, lastItem).map((item:any) => this.buildItem({ item }))
     constructor({ service, itemBuilder, nodeBuilder, viewedItems = 25,gridClass="grid" ,containerClass="wrapper relative"}:IRecyclerScroller) {
-        super({});
+        super({ service, itemBuilder, nodeBuilder, viewedItems, gridClass, containerClass});
+
+        // type of callBack is function or array
+
+        service.setItems =(callBack : Function | any[] ) => {
+            console.log({callBack})
+            if(typeof callBack === "function"){
+                service.items = callBack(service.items)
+                this.getNodes(0,this.initItemsToCalculate)
+                this.handleCalculations()
+            }
+            else {
+                if(!Array.isArray(callBack)) throw new Error("setItems must be a function or an array");
+                if(service.items.length <=0){
+                    service.items = callBack;
+                    this.grid.replaceChildren(...this.getNodes(0,this.initItemsToCalculate));
+                    this.handleCalculations()
+                } else service.items = callBack;
+            }
+            };    
+
         this.useRecycler = localStorage.getItem("useRecycler") !== "Disable Recycler";
         this.service = service;
         this.Card = itemBuilder;
@@ -41,20 +62,21 @@ export default class RecyclerList extends React.Component {
         if (!this.useRecycler) return;
         this.viewedItems = viewedItems;
         this.initItemsToCalculate = 10;
-        this.buildItem = nodeBuilder ? ({ item, i }:any) => nodeBuilder({ item, i }) : ({ item, i }:any) => convertToNode(itemBuilder, item);
+        this.buildItem = nodeBuilder ? ({ item, i }:any) => nodeBuilder({ item, i }) : ({ item, i }:any) => convertToNode(itemBuilder, item,i);
 
         this.grid.className = gridClass;
-        this.grid.append(
-            service.items.slice(0, this.initItemsToCalculate).map((item:any, i:number) => this.buildItem({ item, i }))
-        );
+        this.grid.append(...this.getNodes(0,this.initItemsToCalculate));
     }
     componentDidMount() {
         if (!this.useRecycler) return;
         this.container = document.querySelector<HTMLElement>("#recycler")!;
+        console.log(this)
         this.container.append(this.grid);
+        // this.grid.append(...this.service.items.slice(this.initItemsToCalculate, this.viewedItems).map((item:any, i:number) => this.buildItem({ item, i })));
         this.handleCalculations();
-        this.grid.append(...this.service.items.slice(this.initItemsToCalculate, this.viewedItems).map((item:any, i:number) => this.buildItem({ item, i })));
+        this.grid.append(...this.getNodes(this.viewedItems ,this.viewedItems+this.initItemsToCalculate));
         this.handleCalculations();
+
         this.scrollerIndecator = createIndecator(this);
         this.container.parentElement!.append(this.scrollerIndecator);
         this.container.addEventListener("scroll", ({ target }:any) => recyclingOnScroll(target, this));
@@ -85,11 +107,29 @@ export default class RecyclerList extends React.Component {
         </div>
     );
     handleCalculations = () => {
-        this.colums = Math.floor(this.container.offsetWidth /(this.grid.querySelector<HTMLElement>(".first-child")?.offsetWidth||0));
-        this.viewedItems = Math.floor(this.viewedItems / this.colums) * this.colums;
+        this.colums = Math.floor(this.container.offsetWidth /(this.grid.firstChild?.offsetWidth||0));
+        let viewedItems =this.colums* Math.floor(this.viewedItems / this.colums) ;
+        if(viewedItems){
+            if(viewedItems > this.service.items.length) viewedItems = this.service.items.length;
+            this.viewedItems = viewedItems;
+        }
+
         this.scrollHeight = this.container.scrollHeight - this.container.offsetHeight;
         this.centerOfContainer = this.scrollHeight / 2;
         this.lastItem = this.viewedItems;
+        console.log(
+            "colums",
+            this.colums,
+            "viewedItems",
+            this.viewedItems,
+            "scrollHeight",
+            this.scrollHeight,
+            "centerOfContainer",
+            this.centerOfContainer,
+            "lastItem",
+            this.lastItem
+            
+        )
     };
 
 
@@ -128,7 +168,7 @@ const onScrollDown = (recycler:RecyclerList) => {
     recycler.lastItem += recycler.colums;
     let array = recycler.service.items.slice(start, recycler.lastItem);
     for (let i = 0; i < array.length; i++) {
-        let itemNode = recycler.buildItem({ item: array[i], setItem: recycler.service.setItem });
+        let itemNode = recycler.buildItem({ item: array[i], i });
         recycler.grid.firstChild?.remove();
         recycler.grid.append(itemNode);
     }
@@ -140,7 +180,7 @@ const onScrollUp = (recycler:RecyclerList) => {
     let start = end + recycler.colums;
     let array = recycler.service.items.slice(end, start);
     for (let i = array.length - 1; i > -1; i--) {
-        let itemNode = recycler.buildItem({ item: array[i], setItem: recycler.service.setItem });
+        let itemNode = recycler.buildItem({ item: array[i], i });
         recycler.grid.lastChild?.remove();
         recycler.grid.prepend(itemNode);
     }
@@ -177,7 +217,7 @@ const createIndecator = (recycler:RecyclerList) => {
         const mouseUp = () => {
             console.log(recycler.lastItem);
             recycler.grid.replaceChildren(
-                ...recycler.service.items.slice(recycler.lastItem - recycler.viewedItems, recycler.lastItem).map((item:any, i:number) => recycler.buildItem({ item, i }))
+                ...recycler.getNodes(recycler.lastItem - recycler.viewedItems , recycler.lastItem)
             );
             recycler.container.scrollTop = recycler.container.scrollTop > recycler.centerOfContainer ? recycler.container.scrollHeight : 0;
             window.removeEventListener("mousemove", recycler.onSwipeIndecator);
@@ -195,7 +235,7 @@ const createIndecator = (recycler:RecyclerList) => {
 //     // ,{ threshold: 1, root: document.getElementById("recycler"), rootMargin: "0px" }
 // );
 
-const convertToNode = (node:any, item:any) => create(node({ item, i: 0 }));
+const convertToNode = (node:any, item:any,i:any) => create(node({ item, i }));
 
 const create = (reactComponent:any) => {
     const element = document.createElement(reactComponent.type);

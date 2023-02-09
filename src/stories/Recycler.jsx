@@ -1,16 +1,28 @@
 import './service.css';
 import React from 'react';
-import { ApiService, Button, PagenationService, RecyclerList } from '../index';
+import {ApiService,  Button, PagenationService, RecyclerList } from '../index';
 
-
+document.body.className="dark"
 export const Recycler  = () => {
   const service=React.useMemo(()=>{
-    return new PagenationService({ baseURL : 'https://jsonplaceholder.typicode.com',storageKey:'test',storage:localStorage})
+    return new PagenationService({ baseURL : 'https://jsonplaceholder.typicode.com', endpoint:"posts", storageKey:'test',storage:localStorage})
   },[])
+
+  const card=({item,i})=>{
+   return <div className='bg-throne' >
+                <div className='bg-prim text-5xl'>{i}</div>
+                <div>{item.title}</div>
+                <div>{item.body}</div>
+                <div>{item.title}</div>
+                <div>{item.body}</div>
+                <div>{item.title}</div>
+                <div>{item.body}</div>
+          </div>
+  }
 
   return (
     <div className='col-center p-lg' >
-        <Button label="لول"
+        <Button 
         onClick={()=>{
             service.search()
           }}
@@ -19,7 +31,7 @@ export const Recycler  = () => {
           fontLOL: 15,
         }}
         />
-        <RecyclerList service={service}    />
+        <RecyclerList viewedItems={25}  service={service}  itemBuilder={card}  />
     </div>
   );
 };

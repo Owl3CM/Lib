@@ -1,8 +1,8 @@
-export default class ApiServiceJSX {
-    constructor({ baseURL, headers, onResponse, onError, storageKey, storageType = "session" }) {
+export default class ApiService {
+    constructor({ baseURL, headers, onResponse, onError, storageKey, storage = localStorage }) {
         this.storageKey = storageKey;
         if (storageKey) {
-            this.storage = window[storageType + "Storage"];
+            this.storage = storage;
             this.getCleanString = (text = "") => storageKey + text.replace(/[?&=/!]/g, "-");
         }
 
@@ -20,7 +20,7 @@ export default class ApiServiceJSX {
                 return new Promise(async (resolve, reject) => {
                     try {
                         const res = await fetch(_url, props);
-                    this[abortId] = null;
+                        this[abortId] = null;
                         if (res.ok) {
                             let jsonRes = await res?.json();
                             onResponse && onResponse(jsonRes);
@@ -35,7 +35,7 @@ export default class ApiServiceJSX {
                                 statusText,
                                 type,
                                 url: _url,
-                                statusMessage: ApiServiceJSX.StatusCodeByMessage[status] || "Unknown Error",
+                                statusMessage: ApiService.StatusCodeByMessage[status] || "Unknown Error",
                             });
                         }
                     } catch (err) {
@@ -46,11 +46,11 @@ export default class ApiServiceJSX {
                 });
             };
         };
-        this.get=async(endpoint)=>await create("get",this).then(()=>this.get(endpoint))
-        this.post=async(endpoint,body)=>await create("post",this).then(()=>this.post(endpoint,body))
-        this.put=async(endpoint,body)=>await create("put",this).then(()=>this.put(endpoint,body))
-        this.delete=async(endpoint)=>await create("delete",this).then(()=>this.delete(endpoint))
-        this.patch=async(endpoint,body)=>await create("patch",this).then(()=>this.patch(endpoint,body))
+        this.get = async (endpoint) => await create("get", this).then(() => this.get(endpoint));
+        this.post = async (endpoint, body) => await create("post", this).then(() => this.post(endpoint, body));
+        this.put = async (endpoint, body) => await create("put", this).then(() => this.put(endpoint, body));
+        this.delete = async (endpoint) => await create("delete", this).then(() => this.delete(endpoint));
+        this.patch = async (endpoint, body) => await create("patch", this).then(() => this.patch(endpoint, body));
     }
 
     getStored = (store_key) => JSON.parse(this.storage.getItem(this.getCleanString(store_key)));
