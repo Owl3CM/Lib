@@ -1,5 +1,6 @@
-export default class ApiService {
-    constructor({ baseURL, headers, onResponse, onError, storageKey, storage = localStorage }) {
+export class ApiServiceJs {
+    constructor(props) {
+        const { baseURL, headers, onResponse, onError, storageKey, storage } = props;
         this.storageKey = storageKey;
         if (storageKey) {
             this.storage = storage;
@@ -35,7 +36,7 @@ export default class ApiService {
                                 statusText,
                                 type,
                                 url: _url,
-                                statusMessage: ApiService.StatusCodeByMessage[status] || "Unknown Error",
+                                statusMessage: ApiServiceJs.StatusCodeByMessage[status] || "Unknown Error",
                             });
                         }
                     } catch (err) {

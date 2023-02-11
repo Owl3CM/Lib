@@ -1,6 +1,6 @@
-import ApiService from "./ApiService";
+import {ApiServiceJs} from "../ApiService/ApiServiceJs";
 
-export default class PagenationService {
+export class PagenationServiceJs {
     items = [];
     setItems = (items) => {};
     state = "none";
@@ -26,12 +26,13 @@ export default class PagenationService {
     };
     #_init = false;
 
-    constructor({ baseURL, headers, endpoint, onResult, storageKey, storageType, autoFetch, useCash, limit = 25 }) {
-        this.apiService = new ApiService({
+    constructor(props) {
+        const { baseURL, headers, endpoint, onResult, storageKey, storage, autoFetch, useCash, limit = 25 } = props;
+        this.apiService = new ApiServiceJs({
             baseURL,
             headers,
             storageKey,
-            storageType,
+            storage,
         });
         this.useCash = useCash;
         this.autoFetch = autoFetch;

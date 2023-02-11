@@ -1,12 +1,12 @@
-import ApiService from "./ApiService";
+import ApiService from "../ApiService/ApiServiceJs";
 
 export default class StorageService {
     static local = ({ baseURL, headers, onResult, storageKey }) => new StorageService({ baseURL, headers, onResult, storageKey, storageType: "local" });
     static session = ({ baseURL, headers, onResult, storageKey }) => new StorageService({ baseURL, headers, onResult, storageKey, storageType: "local" });
 
-    constructor({ baseURL, headers, onResult, storageKey, storageType = "local" }) {
+    constructor({ baseURL, headers, onResult, storageKey, stroage = localStorage }) {
         this.api = new ApiService({ baseURL, headers, onResult, storageKey, storageType });
-        this.storage = window[storageType + "Storage"];
+        this.storage = stroage;
         this.storageKey = storageKey;
 
         this.get = async (endpoint, body) => {

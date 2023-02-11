@@ -1,6 +1,6 @@
 import React from "react";
 
-export  class RecyclerListJs extends React.Component {
+export class RecyclerListJs extends React.Component {
     constructor({ service, itemBuilder, nodeBuilder, gridClass = "grid", viewedItems = 25,containerClass="wrapper relative hide-scroller py-5xl" }) {
         super();
         this.useRecycler = localStorage.getItem("useRecycler") !== "Disable Recycler";

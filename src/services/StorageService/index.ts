@@ -1,3 +1,4 @@
+export { default } from "./StorageService";
 // const requireService = require.context(".", false, /\.ts$/);
 // console.log({require});
 

@@ -1,6 +1,6 @@
 import './service.css';
 import React from 'react';
-import {ApiService,  Button, PagenationService, RecyclerList } from '../index';
+import {  Button, RecyclerList } from '../index';
 import Utils from '../Utils';
 import PagenationExample from './Recycler/PagenationExample';
 
