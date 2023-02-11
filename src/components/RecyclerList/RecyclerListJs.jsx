@@ -1,6 +1,6 @@
 import React from "react";
 
-export default class RecyclerList extends React.Component {
+export default class RecyclerListJs extends React.Component {
     constructor({ service, itemBuilder, nodeBuilder, gridClass = "grid", viewedItems = 25 }) {
         super();
         this.useRecycler = localStorage.getItem("useRecycler") !== "Disable Recycler";
@@ -142,7 +142,7 @@ const onScrollUp = (recycler) => {
     }
 };
 
-const createIndecator = (recycler = new RecyclerList()) => {
+const createIndecator = (recycler = new RecyclerListJs()) => {
     const scrollerIndecator = document.createElement("p");
     scrollerIndecator.className = "scroller-indecator";
     const height = ((40 || recycler.lastItem) / recycler.service.items.length) * 1000;

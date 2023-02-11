@@ -1,9 +1,9 @@
 const resolve = require("@rollup/plugin-node-resolve");
-const commonjs = require("@rollup/plugin-commonjs");
+const commonjs = require("rollup-plugin-commonjs");
 const typescript = require("@rollup/plugin-typescript");
 const postcss = require("rollup-plugin-postcss");
 const dts = require("rollup-plugin-dts").default;
-
+const babel = require("@rollup/plugin-babel").default;
 const pkg = require("./package.json");
 
 module.exports = [
@@ -21,7 +21,15 @@ module.exports = [
                 sourcemap: true,
             },
         ],
-        plugins: [resolve(), commonjs(), typescript({ tsconfig: "./tsconfig.json" }), postcss({ extract: true })],
+        plugins: [
+            babel({
+                presets: ["@babel/preset-react"],
+            }),
+            resolve(),
+            commonjs(),
+            typescript({ tsconfig: "./tsconfig.json" }),
+            postcss({ extract: true }),
+        ],
     },
     {
         input: "dist/esm/types/index.d.ts",

@@ -22,31 +22,7 @@ interface IRecyclerScroller {
     gridClass: string;
     containerClass: string;
 }
-declare class RecyclerList extends React.Component<IRecyclerScroller> {
-    useRecycler: boolean;
-    service: any;
-    Card: any;
-    buildItem: any;
-    grid: HTMLElement;
-    container: HTMLElement;
-    containerClass: string;
-    scrollerIndecator: any;
-    threshold: number;
-    viewedItems: number;
-    initItemsToCalculate: number;
-    lastItem: number;
-    lastScrollTop: number;
-    centerOfContainer: number;
-    scrollHeight: number;
-    colums: number;
-    lastPointerY: number;
-    updateIndecator: () => void;
-    onSwipeIndecator: (e: any) => void;
-    constructor({ service, itemBuilder, nodeBuilder, viewedItems, gridClass, containerClass }: IRecyclerScroller);
-    componentDidMount(): void;
-    render: () => JSX.Element;
-    handleCalculations: () => void;
-}
+declare const RecyclerList: React.FC<IRecyclerScroller>;
 
 interface IApiServiceOptions {
     baseURL: string;
@@ -80,7 +56,7 @@ interface PagenationServiceProps {
     onResult?: any;
     storageKey?: string;
     storage?: any;
-    useCash?: boolean;
+    useCash: boolean;
     limit?: number;
 }
 type QueryParams = {
@@ -97,14 +73,14 @@ type QueryParam = {
 declare class PagenationService extends ApiService {
     #private;
     items: never[];
-    setItems: (items: any) => void;
+    setItems: (items: any, clear?: boolean) => void;
     state: string;
     setState: (state: any) => void;
     offset: number;
     limit: number;
     query: string;
     canFetch: boolean;
-    useCash?: boolean | undefined;
+    useCash: boolean;
     queryParams: QueryParams;
     apiService: ApiService;
     addItem: (item: any) => void;
