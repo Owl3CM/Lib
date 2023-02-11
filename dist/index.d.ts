@@ -22,7 +22,33 @@ interface IRecyclerScroller {
     gridClass: string;
     containerClass: string;
 }
-declare const RecyclerList: React.FC<IRecyclerScroller>;
+declare class RecyclerList extends React.Component<IRecyclerScroller> {
+    useRecycler: boolean;
+    service: any;
+    Card: any;
+    buildItem: any;
+    grid: HTMLElement | any;
+    container: HTMLElement;
+    containerClass: string;
+    scrollerIndecator: any;
+    threshold: number;
+    viewedItems: number;
+    initItemsToCalculate: number;
+    lastItem: number;
+    lastScrollTop: number;
+    centerOfContainer: number;
+    scrollHeight: number;
+    colums: number;
+    lastPointerY: number;
+    updateIndecator: () => void;
+    onSwipeIndecator: (e: any) => void;
+    getNodes: (firstItem?: number, lastItem?: number) => any;
+    initGrid: (recycler: RecyclerList) => void;
+    constructor({ service, itemBuilder, nodeBuilder, viewedItems, gridClass, containerClass }: IRecyclerScroller);
+    componentDidMount(): void;
+    render: () => JSX.Element;
+    handleCalculations: () => void;
+}
 
 interface IApiServiceOptions {
     baseURL: string;

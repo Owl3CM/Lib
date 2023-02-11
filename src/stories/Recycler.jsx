@@ -2,7 +2,7 @@ import './service.css';
 import React from 'react';
 import {ApiService,  Button, PagenationService, RecyclerList } from '../index';
 import Utils from '../Utils';
-import RecyclerScroller from '../components/RecyclerList/RecyclerList';
+import RecyclerScroller from '../components/RecyclerList/RecyclerListJsts';
 import PagenationExample from './Recycler/PagenationExample';
 
 document.body.className="dark"
