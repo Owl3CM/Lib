@@ -1,12 +1,11 @@
 {
   "name": "morabaa-lib",
-  "version": "1.0.35",
+  "version": "1.0.36",
   "license": "MIT",
   "private": false,
   "scripts": {
     "build": "rm -rf dist && rollup -c && yarn publish",
     "storybook": "start-storybook -p 6006",
-    "story": "rm -rf dist && rollup -c && start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
   "devDependencies": {
@@ -29,19 +28,18 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rollup": "^3.14.0",
+    "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-dts": "^5.1.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5"
   },
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/index.d.js",
+  "main": "dist/cjs/index.ts",
+  "module": "dist/esm/index.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
-  "dependencies": {
-    "rollup-plugin-commonjs": "^10.1.0"
-  }
+  "dependencies": {}
 }
