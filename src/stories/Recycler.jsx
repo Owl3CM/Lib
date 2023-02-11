@@ -2,7 +2,6 @@ import './service.css';
 import React from 'react';
 import {ApiService,  Button, PagenationService, RecyclerList } from '../index';
 import Utils from '../Utils';
-import RecyclerScroller from '../components/RecyclerList/RecyclerListJsts';
 import PagenationExample from './Recycler/PagenationExample';
 
 document.body.className="dark"
@@ -67,7 +66,7 @@ export const Recycler  = () => {
           </div>
   }
   
-  return <RecyclerScroller viewedItems={25}  service={service}  itemBuilder={card}  />
+  return <RecyclerList viewedItems={25}  service={service}  itemBuilder={card}  />
   return (
     <div className='col-center p-lg' >
         <Button 
