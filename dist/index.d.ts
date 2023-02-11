@@ -14,14 +14,14 @@ declare class Button extends React.Component<ButtonProps> {
     render(): JSX.Element;
 }
 
-interface IRecyclerScroller {
+type IRecyclerScroller = {
     service: any;
     itemBuilder: any;
     nodeBuilder?: any;
     viewedItems: number;
     gridClass: string;
     containerClass: string;
-}
+};
 declare const RecyclerList: React.FC<IRecyclerScroller>;
 
 interface IApiServiceOptions {

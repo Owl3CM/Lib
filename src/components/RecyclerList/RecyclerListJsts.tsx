@@ -1,7 +1,7 @@
 import React from "react";
 import {RecyclerListJs} from "./RecyclerListJs";
 
-interface IRecyclerScroller {
+type IRecyclerScroller ={
     service: any;
     itemBuilder: any;
     nodeBuilder?: any;

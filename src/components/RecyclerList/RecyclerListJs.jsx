@@ -1,11 +1,12 @@
 import React from "react";
 
 export  class RecyclerListJs extends React.Component {
-    constructor({ service, itemBuilder, nodeBuilder, gridClass = "grid", viewedItems = 25 }) {
+    constructor({ service, itemBuilder, nodeBuilder, gridClass = "grid", viewedItems = 25,containerClass="wrapper relative hide-scroller py-5xl" }) {
         super();
         this.useRecycler = localStorage.getItem("useRecycler") !== "Disable Recycler";
         this.service = service;
         this.Card = itemBuilder;
+        this.containerClass = containerClass;
 
         if (!this.useRecycler) return;
 
@@ -62,9 +63,9 @@ export  class RecyclerListJs extends React.Component {
                 {this.useRecycler ? "Disable Recycler" : "Enable Recycler"}
             </p>
             {this.useRecycler ? (
-                <div id="recycler" className="wrapper relative hide-scroller py-5xl" />
+                <div id="recycler" className={this.containerClass} />
             ) : (
-                <div className="wrapper relative py-5xl">
+                <div className={this.containerClass}>
                     <div className="grid" style={{ paddingBottom: "200px" }}>
                         {this.service.items.map((item, i) => (
                             <this.Card key={i} item={item} />
