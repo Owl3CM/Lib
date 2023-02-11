@@ -9,7 +9,7 @@ interface PagenationServiceProps {
     storageKey?:string,
     storage?:any,
     // autoFetch?:boolean,
-    useCash?:boolean,
+    useCash:boolean,
     limit?:number
 }
 type PagenationServiceState = "none" | "searching" | "reloading" | "itemsLoading" | "error";
@@ -17,7 +17,7 @@ type QueryParams = { [key: string]: { value: any; title: string } };
 type QueryParam = { id: string; value: any; title: string };
 export default class PagenationService extends ApiService{
     items = [];
-    setItems = (items:any) => {};
+    setItems = (items:any,clear?:boolean) => {};
     state = "none";
     setState = (state:any) => {};
     
@@ -25,8 +25,8 @@ export default class PagenationService extends ApiService{
     limit = 25;
     query = "";
     canFetch = false;
+    useCash: boolean;
     // autoFetch? = false;
-    useCash? = false;
     queryParams:QueryParams = {};
     
     apiService:ApiService;
@@ -47,10 +47,10 @@ export default class PagenationService extends ApiService{
     
     #_init = false;
     
-    constructor({ baseURL, headers, endpoint, onResult, storageKey, storage,  useCash, limit = 25 }: PagenationServiceProps) {
+    constructor({ baseURL, headers, endpoint, onResult, storageKey, storage,  useCash=false, limit = 25 }: PagenationServiceProps) {
         super({ baseURL, headers, storageKey, storage });
         this.apiService = new ApiService({baseURL,headers,storageKey,storage,});
-        this.useCash = useCash;
+        this.useCash = ( useCash && !!storageKey);
         // this.autoFetch = autoFetch;
         this.onResult = onResult;
         this.limit = limit;
@@ -164,7 +164,7 @@ export default class PagenationService extends ApiService{
             }
         }
 
-        if (service.offset === 0) service.setItems(items);
+        if (service.offset === 0) service.setItems(items,true);
         else service.setItems((_prev:any) => [..._prev, ...items]);
 
         service.offset += items.length;

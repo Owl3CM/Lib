@@ -35,8 +35,6 @@ export default class RecyclerList extends React.Component<IRecyclerScroller> {
     constructor({ service, itemBuilder, nodeBuilder, viewedItems = 25,gridClass="grid" ,containerClass="wrapper relative"}:IRecyclerScroller) {
         super({ service, itemBuilder, nodeBuilder, viewedItems, gridClass, containerClass});
 
-        // type of callBack is function or array
-
         service.setItems =(callBack : Function | any[] ) => {
             console.log({callBack})
             if(typeof callBack === "function"){

@@ -19,8 +19,8 @@ export default class ApiService {
     patch: (endpoint: string, body: any) => Promise<any>;
     
     constructor({ baseURL, headers, storageKey, storage=localStorage, onResponse, onError,} :IApiServiceOptions) {
-        this.storageKey = storageKey;
         if (storageKey) {
+            this.storageKey = storageKey;
             this.storage = storage;
             this.getCleanString = (text = "") => storageKey + text.replace(/[?&=/!]/g, "-");
         }

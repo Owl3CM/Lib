@@ -1,18 +1,22 @@
 import React from "react";
 
-export default class RecyclerList extends React.Component {
-    constructor({ service, itemBuilder, nodeBuilder, gridClass = "grid", viewedItems = 25 }) {
+export default class RecyclerScroller extends React.Component {
+    constructor({ service, itemBuilder, nodeBuilder, viewedItems = 25, gridClass = "grid", containerClass = "wrapper relative" }) {
         super();
+        this.getNodes = (firstItem = 0, lastItem = this.lastItem) => this.service.items.slice(firstItem, lastItem).map((item) => this.buildItem({ item }));
         this.useRecycler = localStorage.getItem("useRecycler") !== "Disable Recycler";
         this.service = service;
         this.Card = itemBuilder;
+        this.containerClass = containerClass;
+        this.gridClass = gridClass;
 
         if (!this.useRecycler) return;
-
-        service.setItems = (callBack, clear) => {
-            const _clear = clear || service.items.length <= 0;
+        service.setItems = (callBack) => {
             if (typeof callBack === "function") {
-                _clear && this.initGrid();
+                if (service.items.length <= 0) {
+                    service.items = callBack(service.items);
+                    this.initGrid();
+                }
                 service.items = callBack(service.items);
             } else {
                 if (!Array.isArray(callBack)) throw new Error("setItems must be a function or an array");
@@ -25,26 +29,22 @@ export default class RecyclerList extends React.Component {
         this.viewedItems = viewedItems;
         this.initItemsToCalculate = 10;
         this.buildItem = nodeBuilder ? ({ item, i }) => nodeBuilder({ item, i }) : ({ item, i }) => convertToNode(itemBuilder, item);
-
         this.grid = document.createElement("div");
-        this.grid.className = gridClass;
-        this.grid.append(...service.items.slice(0, this.initItemsToCalculate).map((item, i) => this.buildItem({ item, i })));
-
-        this.initGrid = () => {
-            this.grid.replaceChildren(...service.items.slice(0, this.initItemsToCalculate).map((item, i) => this.buildItem({ item, i })));
-            this.handleCalculations();
-            this.grid.append(...service.items.slice(this.initItemsToCalculate, this.viewedItems).map((item, i) => this.buildItem({ item, i })));
-            this.handleCalculations();
-        };
+        this.grid.className = this.gridClass;
+        this.grid.replaceChildren(...this.getNodes(0, this.initItemsToCalculate));
     }
+    initGrid = (clear = false) => {
+        this.grid.replaceChildren(...this.getNodes(0, this.initItemsToCalculate));
+        this.handleCalculations();
+        this.grid.append(...this.getNodes(this.initItemsToCalculate, this.viewedItems));
+        this.handleCalculations();
+    };
+
     componentDidMount() {
         if (!this.useRecycler) return;
         this.container = document.getElementById("recycler");
         this.container.append(this.grid);
-        this.handleCalculations();
-        console.log(this.grid);
-        this.grid.append(...this.service.items.slice(this.initItemsToCalculate, this.viewedItems).map((item, i) => this.buildItem({ item, i })));
-        this.handleCalculations();
+        this.initGrid();
         this.scrollerIndecator = createIndecator(this);
         this.container.parentElement.append(this.scrollerIndecator);
         this.container.addEventListener("scroll", ({ target }) => recyclingOnScroll(target, this));
@@ -64,8 +64,8 @@ export default class RecyclerList extends React.Component {
             {this.useRecycler ? (
                 <div id="recycler" className="wrapper relative hide-scroller py-5xl" />
             ) : (
-                <div className="wrapper relative py-5xl">
-                    <div className="grid" style={{ paddingBottom: "200px" }}>
+                <div className={this.containerClass}>
+                    <div className={this.gridClass} style={{ paddingBottom: "200px" }}>
                         {this.service.items.map((item, i) => (
                             <this.Card key={i} item={item} />
                         ))}
@@ -75,12 +75,14 @@ export default class RecyclerList extends React.Component {
         </div>
     );
     handleCalculations = () => {
-        if (!this.grid.firstChild) return;
-        this.colums = Math.floor(this.container.offsetWidth / this.grid.firstChild.offsetWidth);
+        this.colums = Math.floor(this.container.offsetWidth / this.grid.firstChild?.offsetWidth);
+        console.log({ container: this.container });
+        if (!this.colums) return;
         this.viewedItems = Math.floor(this.viewedItems / this.colums) * this.colums;
         this.scrollHeight = this.container.scrollHeight - this.container.offsetHeight;
         this.centerOfContainer = this.scrollHeight / 2;
         this.lastItem = this.viewedItems;
+        console.log({ colums: this.colums, viewedItems: this.viewedItems, scrollHeight: this.scrollHeight, centerOfContainer: this.centerOfContainer });
     };
 
     threshold = 200;
@@ -102,6 +104,7 @@ const recyclingOnScroll = (target, recycler) => {
             if (recycler.lastItem + recycler.colums >= recycler.service.items.length) {
                 if (!recycler.service.canFetch) return;
                 recycler.service.loadMore().then(() => {
+                    console.log(recycler.service.items.length);
                     setTimeout(() => onScrollDown(recycler), 10);
                     const height = ((40 || recycler.lastItem) / recycler.service.items.length) * 1000;
                     recycler.scrollerIndecator.style.height = `${height < 40 ? 40 : height}px`;
@@ -142,8 +145,8 @@ const onScrollUp = (recycler) => {
     }
 };
 
-const createIndecator = (recycler = new RecyclerList()) => {
-    const scrollerIndecator = document.createElement("p");
+const createIndecator = (recycler = new RecyclerScroller()) => {
+    const scrollerIndecator = document.createElement("div");
     scrollerIndecator.className = "scroller-indecator";
     const height = ((40 || recycler.lastItem) / recycler.service.items.length) * 1000;
     scrollerIndecator.style.height = `${height < 40 ? 40 : height}px`;
