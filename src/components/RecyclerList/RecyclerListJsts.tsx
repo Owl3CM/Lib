@@ -1,5 +1,5 @@
 import React from "react";
-const RecyclerListJs  = require('./RecyclerListJs').default;
+import {RecyclerListJs} from "./RecyclerListJs";
 
 interface IRecyclerScroller {
     service: any;

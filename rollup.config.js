@@ -25,7 +25,9 @@ module.exports = [
             babel({
                 presets: ["@babel/preset-react"],
             }),
-            resolve(),
+            resolve({
+                extensions: [".js", ".jsx", ".ts", ".tsx"],
+            }),
             commonjs(),
             typescript({ tsconfig: "./tsconfig.json" }),
             postcss({ extract: true }),
