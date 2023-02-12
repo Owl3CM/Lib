@@ -1,4 +1,4 @@
-import  StorageServiceJs from './StorageService';
+import  StorageServiceJs from '../../../services/CashService';
 
 type PagenationServiceProps = {
     baseURL:string,

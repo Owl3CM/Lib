@@ -10,5 +10,5 @@ type IRecyclerScroller ={
     containerClass: string;
 }
 
-const RecyclerList:React.FC<IRecyclerScroller> = (props: IRecyclerScroller) => <RecyclerListJs {...props} />
-export default RecyclerList;
+const RecyclerListTs:React.FC<IRecyclerScroller> = (props: IRecyclerScroller) => <RecyclerListJs {...props} />
+export default RecyclerListTs;

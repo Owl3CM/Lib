@@ -1,4 +1,4 @@
-export { default } from "./StorageService";
+export { default } from "../../../services/CashService";
 // const requireService = require.context(".", false, /\.ts$/);
 // console.log({require});
 
