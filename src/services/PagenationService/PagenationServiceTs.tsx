@@ -11,8 +11,8 @@ type PagenationServiceProps = {
     useCash?:boolean,
     limit?:number
 }
-export default class PagenationService extends PagenationServiceJs{
+export default class PagenationService {
     constructor(props:PagenationServiceProps) {
-        super(props);
+         new PagenationServiceJs(props);
     }
 }

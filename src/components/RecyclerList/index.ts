@@ -1,1 +1,1 @@
-export {default} from './RecyclerListJSX';
+export {default} from './RecyclerListTs';

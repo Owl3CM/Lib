@@ -1,5 +1,5 @@
 import React from "react";
-import {RecyclerListJs} from "./RecyclerListJs";
+import { RecyclerListJs } from "./RecyclerListJs";
 
 type IRecyclerScroller ={
     service: any;

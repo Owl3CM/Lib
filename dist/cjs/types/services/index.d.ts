@@ -1,1 +1,1 @@
-export * from './ApiService';
+export { default as PagenationService } from "./PagenationService";
