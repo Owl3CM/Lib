@@ -21,7 +21,7 @@ export default class ApiService {
     constructor({ baseURL, headers, storageKey, storage=localStorage, onResponse, onError,} :IApiServiceOptions) {
         if (storageKey) {
             this.storageKey = storageKey;
-            this.storage = storage;
+            this.storage = storage
             this.getCleanString = (text = "") => storageKey + text.replace(/[?&=/!]/g, "-");
         }
 
@@ -79,7 +79,7 @@ export default class ApiService {
         Object.values(data).length > 0 ? this.storage.setItem(this.getCleanString(store_key), JSON.stringify(data)) : this.removeStorage(store_key);
 
     clearStorage = () => {
-        for (let i = 0; i < this.storage.length; i++) {
+        for (let i = 0; i < this.storage?.length; i++) {
             let key = this.storage.key(i);
             if (key.startsWith(this.storageKey)) this.storage.removeItem(key);
         }

@@ -9,7 +9,7 @@ interface PagenationServiceProps {
     storageKey?:string,
     storage?:any,
     // autoFetch?:boolean,
-    useCash:boolean,
+    useCash?:boolean,
     limit?:number
 }
 type PagenationServiceState = "none" | "searching" | "reloading" | "itemsLoading" | "error";
@@ -19,7 +19,9 @@ export default class PagenationService extends ApiService{
     items = [];
     setItems = (items:any,clear?:boolean) => {};
     state = "none";
-    setState = (state:any) => {};
+    setState = (state:any) => {
+        this.state=state;
+    };
     
     offset = 0;
     limit = 25;

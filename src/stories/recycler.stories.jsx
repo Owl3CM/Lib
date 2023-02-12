@@ -8,5 +8,4 @@ export default {
 
 const Template=  (args) => <Recycler {...args} />;
 
-export const LoggedOut = Template.bind({});
-export const LoggedIn = Template.bind({});
+export const One = Template.bind({});

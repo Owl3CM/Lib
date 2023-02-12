@@ -3,7 +3,7 @@ import { ComponentStory, ComponentMeta } from '@storybook/react';
 import { Service } from './Service';
 
 export default {
-  title: 'Example/Page',
+  title: 'Examples/Page',
   component: Service,
   parameters: {
     layout: 'fullscreen',
@@ -12,5 +12,4 @@ export default {
 
 const Template: ComponentStory<typeof Service> = (args:any) => <Service {...args} />;
 
-export const LoggedOut = Template.bind({});
-export const LoggedIn = Template.bind({});
+export const One = Template.bind({});

@@ -1,13 +1,20 @@
 import React from "react";
 
-const Refresher = ({ service, onRefresh, children, className, id, refrence, ...porps }) => {
-    const containerId = id || "refresher" + Math.random().toFixed(2);
+type RefresherProps = {
+    service: any;
+    onRefresh?: any;
+    className?: string;
+    id?: string;
+    refrence?: any;
+    children?: any;
+    onScroll?: any;
+};
 
-    React.useMemo(() => {
-        setTimeout(() => {
-            if (onRefresh) addScrollEvent(service, onRefresh, containerId);
-        }, 100);
-    }, []);
+const Refresher: React.FC<RefresherProps> = ({ service, onRefresh, children, className, id, refrence, ...porps }) => {
+    const containerId = id || "refresher" + Math.random().toFixed(2);
+    setTimeout(() => {
+        if (onRefresh) addScrollEvent(service, onRefresh, containerId);
+    }, 100);
 
     if (!onRefresh)
         return (
@@ -15,7 +22,6 @@ const Refresher = ({ service, onRefresh, children, className, id, refrence, ...p
                 {children}
             </div>
         );
-
     return (
         <div ref={refrence} className={className} id={containerId} {...porps}>
             <div id="refresher">
@@ -38,10 +44,10 @@ const Refresher = ({ service, onRefresh, children, className, id, refrence, ...p
     );
 };
 
-export default React.memo(Refresher);
+export default Refresher;
 
-const addScrollEvent = (service, onRefresh, id) => {
-    const scroller = document.getElementById(id);
+const addScrollEvent = (service: any, onRefresh: any, id: string) => {
+    const scroller: any = document.getElementById(id);
     let reloader = scroller.firstChild;
 
     reloader.remove = () => {
@@ -53,7 +59,7 @@ const addScrollEvent = (service, onRefresh, id) => {
     let diff = 0;
     if (!scroller) return;
 
-    const onSwipeDown = (e) => {
+    const onSwipeDown = (e: any) => {
         diff = e.touches[0].clientY - service.startY;
         if (diff > 20) {
             if (diff > 200) diff = 200;
@@ -89,7 +95,7 @@ const addScrollEvent = (service, onRefresh, id) => {
         } else scroller.insertBefore(reloader, scroller.firstChild);
     }, 300);
 
-    scroller.addEventListener("touchstart", (e) => {
+    scroller.addEventListener("touchstart", (e: any) => {
         if (scroller.scrollTop > 5 || service.pulling || service.state !== "none") return;
         service.pulling = true;
         reloader.style.opacity = "0";
