@@ -1,3 +1,3 @@
 /// <reference types="react" />
-import './service.css';
+import "./service.css";
 export declare const Service: () => JSX.Element;

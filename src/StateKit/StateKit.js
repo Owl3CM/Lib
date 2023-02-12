@@ -1,4 +1,3 @@
-import React, { Fragment } from "react";
 import ItemsLoading from "./ItemsLoading";
 import Loading from "./Loading";
 import Error from "./Error";
@@ -13,7 +12,8 @@ const PageStateKit = {
     error: Error,
     searching: Searching,
     noData: EmptyList,
-    none: () => <Fragment />,
+    none: () => <></>,
 };
+const getComponent = (state) => PageStateKit[state] || PageStateKit.none;
 
-export default PageStateKit;
+export default getComponent;

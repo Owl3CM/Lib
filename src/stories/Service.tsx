@@ -1,15 +1,18 @@
 import "./service.css";
 import React from "react";
-import { Grid, PagenationService, PaginationScroller } from "../services";
+import { ApiService, Grid, PagenationService, PaginationScroller } from "../services";
 import { Button } from "../components";
 
 document.documentElement.setAttribute("dir", "rtl");
 
 export const Service = () => {
     const service = React.useMemo(() => {
-        const _service = new PagenationService({ baseURL: "https://jsonplaceholder.typicode.com", endpoint: "posts", storageKey: "posts" });
+        const apiService = new ApiService({ baseURL: "https://jsonplaceholder.typicode.com" });
+        const callback = apiService.get.bind(apiService);
+
+        const _service = new PagenationService({ callback, storageKey: "posts", endpoint: "posts" });
+
         _service.search();
-        console.log(_service);
         return _service;
     }, []);
 

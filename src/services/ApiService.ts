@@ -6,12 +6,7 @@ interface IApiServiceOptions {
     storageKey?: string;
     storage?:any ;
 }
-
 export default class ApiService {
-    storage?:any
-    storageKey?:string;
-    getCleanString:any
-    
     get: (endpoint: string) => Promise<any>;
     delete : (endpoint: string) => Promise<any>;
     post : (endpoint: string, body: any) => Promise<any>;
@@ -19,12 +14,6 @@ export default class ApiService {
     patch: (endpoint: string, body: any) => Promise<any>;
     
     constructor({ baseURL, headers, storageKey, storage=localStorage, onResponse, onError,} :IApiServiceOptions) {
-        if (storageKey) {
-            this.storageKey = storageKey;
-            this.storage = storage
-            this.getCleanString = (text = "") => storageKey + text.replace(/[?&=/!]/g, "-");
-        }
-
         const create = async (method:string,api:any) => {
             api[method] = (endpoint:string, body:any) => {
                 const abortId = `${method}-${endpoint.includes("?") ? endpoint.split("?")[0] : endpoint}`;
@@ -72,21 +61,7 @@ export default class ApiService {
         this.patch=async(endpoint:string,body:any)=>await create("patch",this).then(()=>this.patch(endpoint,body))
     }
   
-   
-    getStored:any = (store_key:string) => JSON.parse(this.storage.getItem(this.getCleanString(store_key)));
-    removeStorage = (store_key:string) => this.storage.removeItem(this.getCleanString(store_key));
-    setStorage = (store_key:string, data:any) =>
-        Object.values(data).length > 0 ? this.storage.setItem(this.getCleanString(store_key), JSON.stringify(data)) : this.removeStorage(store_key);
-
-    clearStorage = () => {
-        for (let i = 0; i < this.storage?.length; i++) {
-            let key = this.storage.key(i);
-            if (key.startsWith(this.storageKey)) this.storage.removeItem(key);
-        }
-    };
- 
-
-    static StatusCodeByMessage:any = {
+static StatusCodeByMessage:any = {
         0: "There Is No Response From Server Body Is Empty Connection May Be Very Slow",
 
         100: " Continue ",

@@ -1,7 +1,7 @@
-import React, { Fragment } from "react";
+import React from "react";
 
 const Boolean = ({ json, key }) => <span key={key} className="obj-text-1">{`${json}`}</span>;
-const StringArray = (json) => <span className="obj-text-2 px-sm">" {json} "" </span>;
+const StringArray = ({ json }) => <span className="obj-text-2 px-sm">" {json} "" </span>;
 const Image = ({ json }) => <img src={json} style={{ maxWidth: 100, objectFit: "contain" }} />;
 const ArrayImages = ({ json }) => json.map((_i) => <img key={_i} src={_i} style={{ width: 150 }} />);
 const Function = ({ json, key }) => {
@@ -30,7 +30,7 @@ const Array = ({ json }) => {
             <span className="obj-text-3 px-sm">{"["}</span>
             {json.map((_i, i) => {
                 let _type = getType(_i);
-                return <Fragment key={i}>{_type === "Object" || _type === "Array" ? <_Object json={_i} /> : StringArray(_i)}</Fragment>;
+                return _type === "Object" || _type === "Array" ? <_Object key={i} json={_i} /> : <StringArray key={i} json={_i} />;
             })}
             <span className="obj-text-3 px-sm" style={{ alignSelf: "end" }}>
                 {"]"}
@@ -95,7 +95,7 @@ const JsonToView = ({ json, className = "json-builder" }) => {
 
 export default JsonToView;
 const valdTyps = ["String", "Number", "Boolean", "Object", "Array", "ArrayImages", "Undefined", "Null", "Image", "Function"];
-const UiKit = { String, Number, Boolean, Image, Function, Object: _Object, Array, ArrayImages, Null: () => <Fragment />, Undefined: () => <Fragment /> };
+const UiKit = { String, Number, Boolean, Image, Function, Object: _Object, Array, ArrayImages, Null: () => <span />, Undefined: () => <span /> };
 const nullables = [undefined, null, ""];
 
 const getType = (obj) => {

@@ -1,23 +1,28 @@
 import Utils from "../Utils";
-import ApiService from "./ApiService";
-
 interface PagenationServiceProps {
-    baseURL:string,
     headers?:any,
-    endpoint:string,
     onResult?:any,
     storageKey?:string,
     storage?:any,
+    endpoint?: string;
     // autoFetch?:boolean,
     useCash?:boolean,
-    limit?:number
+    limit?:number,
+    callback?:any,
 }
 type PagenationServiceState = "none" | "searching" | "reloading" | "itemsLoading" | "error";
 type QueryParams = { [key: string]: { value: any; title: string } };
 type QueryParam = { id: string; value: any; title: string };
-export default class PagenationService extends ApiService{
+export default class PagenationService{
+    storage?:any
+    storageKey?:string;
+    getCleanString:any
+
     items = [];
-    setItems = (items:any,clear?:boolean) => {};
+    setItems = (items:any,clear?:boolean) => {
+        this.items = clear ? items : [...this.items, ...items];
+    };
+
     state = "none";
     setState = (state:any) => {
         this.state=state;
@@ -30,10 +35,8 @@ export default class PagenationService extends ApiService{
     useCash: boolean;
     // autoFetch? = false;
     queryParams:QueryParams = {};
+    callback:any;
     
-    apiService:ApiService;
-    addItem = (item:any) => {};
-    updateItem = (query:any) => {};
     onResult = (result:any, service:PagenationService)  => {return result};
     onError = (error:any, service:PagenationService) => {};
     
@@ -41,31 +44,28 @@ export default class PagenationService extends ApiService{
     search = async () => {};
     reload = async () => {};
     
-    clearStorage = async () => {
-        this.apiService.clearStorage();
-        this.setItems([]);
-    };
-    
-    
     #_init = false;
     
-    constructor({ baseURL, headers, endpoint, onResult, storageKey, storage,  useCash=false, limit = 25 }: PagenationServiceProps) {
-        super({ baseURL, headers, storageKey, storage });
-        this.apiService = new ApiService({baseURL,headers,storageKey,storage,});
+    constructor({  onResult, storageKey, storage,callback,  useCash=false, limit = 25,endpoint }: PagenationServiceProps) {
         this.useCash = ( useCash && !!storageKey);
+        if (this.useCash) {
+            this.storageKey = storageKey;
+            this.storage = storage
+            this.getCleanString = (text = "") => storageKey + text.replace(/[?&=/!]/g, "-");
+        }
         // this.autoFetch = autoFetch;
         this.onResult = onResult;
         this.limit = limit;
-
+        this.callback = callback;
         this.search = async () => {
             this.canFetch = false;
             this.offset = 0;
             if (!this.queryParams.limit && this.limit) this.queryParams.limit = { value: this.limit, title: "_" };
-
-            this.query = Utils.generateQuery(this.queryParams, endpoint);
-
+            
+            this.query = Utils.generateQuery(this.queryParams,endpoint);
+            
             if (this.useCash) {
-                let cashItems = this.apiService.getStored(this.query);
+                let cashItems = this.getStored(this.query);
                 if (cashItems) {
                     if (!this.#_init) {
                         this.#_init = true;
@@ -82,7 +82,7 @@ export default class PagenationService extends ApiService{
             this.state = "searching";
             this.setState("searching");
             try {
-                const result = await this.apiService.get(this.query);
+                const result = await this.callback(this.query);
                 this.#onResult(result, this);
             } catch (error) {
                 this.#onError(error, this);
@@ -92,10 +92,10 @@ export default class PagenationService extends ApiService{
         this.reload = async () => {
             this.canFetch = false;
             this.offset = 0;
-            this.query = Utils.generateQuery(this.queryParams, endpoint);
+            this.query = Utils.generateQuery(this.queryParams,endpoint);
             this.setState("reloading");
             try {
-                const result = await this.apiService.get(this.query);
+                const result = await this.callback(this.query);
                 this.clearStorage();
                 this.#onResult(result, this);
             } catch (error) {
@@ -108,7 +108,7 @@ export default class PagenationService extends ApiService{
             let query = this.query + `&offset=${this.offset}`;
             this.setState("itemsLoading");
             try {
-                const result = await this.apiService.get(query);
+                const result = await this.callback(query);
                 this.#onResult(result, this);
             } catch (error) {
                 this.#onError(error, this);
@@ -152,17 +152,16 @@ export default class PagenationService extends ApiService{
         } else items = data || [];
 
         if (service.useCash) {
-            const apiService = service.apiService;
             if (service.offset === 0) {
-                let allCashQueries = apiService.getStored("") || [];
+                let allCashQueries = service.getStored("") || [];
                 if (!allCashQueries.includes(service.query)) {
                     allCashQueries.push(service.query);
-                    apiService.setStorage("", allCashQueries);
+                    service.setStorage("", allCashQueries);
                 }
-                apiService.setStorage(service.query, items);
+                service.setStorage(service.query, items);
             } else {
-                let oldItems = apiService.getStored(service.query) || [];
-                apiService.setStorage(service.query, [...oldItems, ...items]);
+                let oldItems = service.getStored(service.query) || [];
+                service.setStorage(service.query, [...oldItems, ...items]);
             }
         }
 
@@ -183,6 +182,17 @@ export default class PagenationService extends ApiService{
         //     }, 100);
         // } else 
         service.setState(service.items.length > 0 || items.length > 0 ? "none" : "noData");
+    };
+    getStored = (store_key:string) => JSON.parse(this.storage.getItem(this.getCleanString(store_key)));
+    removeStorage = (store_key:string) => this.storage.removeItem(this.getCleanString(store_key));
+    setStorage = (store_key:string, data:any) =>
+        Object.values(data).length > 0 ? this.storage.setItem(this.getCleanString(store_key), JSON.stringify(data)) : this.removeStorage(store_key);
+    clearStorage= () => {
+        for (let i = 0; i < this.storage?.length; i++) {
+            let key = this.storage.key(i);
+            if (key.startsWith(this.storageKey)) this.storage.removeItem(key);
+        }
+        this.setItems([]);
     };
 }
 

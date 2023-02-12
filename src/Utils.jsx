@@ -38,7 +38,7 @@ export default class Utils {
             if (Utils.hasValue(value.value)) acc[id] = value.value;
             return acc;
         }, {});
-        return `/${url}?${new URLSearchParams(query)}`;
+        return `${url?`/${url}`:""}?${new URLSearchParams(query)}`;
     };
 
     static sleep = (ms = 3000) => {

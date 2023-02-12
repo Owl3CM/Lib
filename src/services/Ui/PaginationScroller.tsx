@@ -1,5 +1,5 @@
 import React from "react";
-// import ServiceStateBuilder from "../../StateKit/ServiceStateBuilder";
+import ServiceStateBuilder from "../../StateKit/ServiceStateBuilder";
 const postions: any = {};
 type PagenatedScrollerProps = {
     service: any;
@@ -57,7 +57,7 @@ class PagenatedScroller extends React.Component<PagenatedScrollerProps> {
                     </div>
                 )}
                 {children}
-                {/* <ServiceStateBuilder service={service} /> */}
+                <ServiceStateBuilder service={service} />
             </div>
         );
     }
