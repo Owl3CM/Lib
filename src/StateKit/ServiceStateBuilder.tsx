@@ -14,13 +14,14 @@ type ServiceStateBuilderProps = {
 };
 
 const ServiceStateBuilder: React.FC<ServiceStateBuilderProps> = ({ id, service, getBuilder = _getBuilder }) => {
-    const _service = React.useMemo(() => service || getGlobalService(id, global), []);
-    [_service.state, _service.setState] = React.useState(_service.state);
+    return <div>ServiceStateBuilder</div>;
+    // const _service = React.useMemo(() => service || getGlobalService(id, global), []);
+    // [_service.state, _service.setState] = React.useState(_service.state);
 
-    return React.useMemo(() => {
-        let PageState = getBuilder(_service.state);
-        return <PageState service={_service} />;
-    }, [_service.state]);
+    // return React.useMemo(() => {
+    //     let PageState = getBuilder(_service.state);
+    //     return <PageState service={_service} />;
+    // }, [_service.state]);
 };
 
 export default ServiceStateBuilder;

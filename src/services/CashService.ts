@@ -10,8 +10,9 @@ export default class CashService {
     // static local = ({ baseURL, headers, onResponse, storageKey }) => new StorageService({ baseURL, headers, onResponse, storageKey, storageType: "local" });
     // static session = ({ baseURL, headers, onResponse, storageKey }) => new StorageService({ baseURL, headers, onResponse, storageKey, storageType: "local" });
     api: ApiService;
-    storage: any;
-    storageKey: string;
+    storage?:any
+    storageKey?:string;
+    getCleanString:any
     get: any;
     post: any;
     put: any;
@@ -23,10 +24,10 @@ export default class CashService {
         this.storageKey = storageKey;
 
         this.get = async (endpoint:string, body:any) => {
-            const res = this.api.getStored(endpoint);
+            const res = this.getStored(endpoint);
             if (!res) {
                 const res = await this.api.get(endpoint);
-                this.api.setStorage(endpoint, res);
+                this.setStorage(endpoint, res);
             }
             return res;
         };
@@ -40,7 +41,7 @@ export default class CashService {
                 })
                 .catch((err) => {
                     console.log({ err });
-                    if (err.message === "Network Error") this.api.setStorage(`post-${endpoint}`, body);
+                    if (err.message === "Network Error") this.setStorage(`post-${endpoint}`, body);
                     throw err;
                 });
         };
@@ -54,7 +55,7 @@ export default class CashService {
                 })
                 .catch((err) => {
                     console.log({ err });
-                    if (err.message === "Network Error") this.api.setStorage(`put-${endpoint}`, body);
+                    if (err.message === "Network Error") this.setStorage(`put-${endpoint}`, body);
                     throw err;
                 });
         };
@@ -68,7 +69,7 @@ export default class CashService {
                 })
                 .catch((err) => {
                     console.log({ err });
-                    if (err.message === "Network Error") this.api.setStorage(`delete-${endpoint}`, body);
+                    if (err.message === "Network Error") this.setStorage(`delete-${endpoint}`, body);
                     throw err;
                 });
         };
@@ -94,5 +95,15 @@ export default class CashService {
             localStorage.removeItem("token");
         }
         return err;
+    };
+    getStored = (store_key:string) => JSON.parse(this.storage.getItem(this.getCleanString(store_key)));
+    removeStorage = (store_key:string) => this.storage.removeItem(this.getCleanString(store_key));
+    setStorage = (store_key:string, data:any) =>
+        Object.values(data).length > 0 ? this.storage.setItem(this.getCleanString(store_key), JSON.stringify(data)) : this.removeStorage(store_key);
+    clearStorage= () => {
+        for (let i = 0; i < this.storage?.length; i++) {
+            let key = this.storage.key(i);
+            if (key.startsWith(this.storageKey)) this.storage.removeItem(key);
+        }
     };
 }

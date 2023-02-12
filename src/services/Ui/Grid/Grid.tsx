@@ -1,5 +1,5 @@
 import React from "react";
-// import { JsonBuilder } from "../../NodeBuilder";
+import GridJs from "./GridJS";
 
 interface GridProps {
     service: any;
@@ -8,19 +8,20 @@ interface GridProps {
     onClick?: any;
 }
 
-const Grid : React.FC<GridProps> = ({ service, ItemBuilder , className = "grid", onClick }:GridProps) => {
-    [service.items, service.setItems] = React.useState(service.items);
-    service.setItem = React.useMemo(() => (item?:any) => service.setItems((items?:any) => items.map((i:any) => (i.id === item.id ? item : i))), []);
-    return (
-        <div id="grid-container" className={className} onClick={onClick}>
-            {service.items.map((item: any, i: number) => (
-                <ItemBuilder key={i} item={item} />
-            ))}
-        </div>
-    );
-};
-
+const Grid: React.FC<GridProps> = (props: GridProps) => <GridJs {...props} />;
 export default Grid;
+
+// const Grid : React.FC<GridProps> = ({ service, ItemBuilder , className = "grid", onClick }:GridProps) => {
+//     [service.items, service.setItems] = React.useState(service.items);
+//     service.setItem = React.useMemo(() => (item?:any) => service.setItems((items?:any) => items.map((i:any) => (i.id === item.id ? item : i))), []);
+//     return (
+//         <div id="grid-container" className={className} onClick={onClick}>
+//             {service.items.map((item: any, i: number) => (
+//                 <ItemBuilder key={i} item={item} />
+//             ))}
+//         </div>
+//     );
+// };
 
 // import React from "react";
 // import { JsonToView } from "../../NodeBuilder";
@@ -45,14 +46,6 @@ export default Grid;
 // };
 
 // export default React.memo(Grid);
-
-
-
-
-
-
-
-
 
 // import React from "react";
 // import { JsonToView } from "../NodeBuilder";

@@ -1,5 +1,5 @@
 import React from "react";
-import ServiceStateBuilder from "../../StateKit/ServiceStateBuilder";
+import ServiceStateBuilder from "../../../StateKit/ServiceStateBuilder";
 const postions: any = {};
 type PagenatedScrollerProps = {
     service: any;
@@ -14,7 +14,7 @@ type PagenatedScrollerProps = {
     loadingMoreBuilder?: any;
 };
 
-class PagenatedScroller extends React.Component<PagenatedScrollerProps> {
+class PaginatedScroller extends React.Component<PagenatedScrollerProps> {
     container: any;
     id: string;
     refresh: any;
@@ -63,7 +63,7 @@ class PagenatedScroller extends React.Component<PagenatedScrollerProps> {
     }
 }
 
-export default PagenatedScroller;
+export default PaginatedScroller;
 
 const pullToRefreshEvent = (container: any, service: any, refresh: any) => {
     let reloader = container.firstChild;

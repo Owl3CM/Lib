@@ -1,11 +1,11 @@
 import React from "react";
-import Grid from "./Grid";
+import Grid from "../Grid/Grid";
 
 type ButtonProps = {
     onClick: any;
     title: string;
     className?: string;
-}
+};
 
 const Button = ({ onClick, title, className = "bg-red text-white" }: ButtonProps) => (
     <p className={`px-md py-sm rounded-lg pointer ${className}`} onClick={onClick}>
@@ -16,7 +16,7 @@ const Button = ({ onClick, title, className = "bg-red text-white" }: ButtonProps
 type MultiBuilderGridProps = {
     service: any;
     builders: any;
-}
+};
 
 const MultiBuilderGrid = ({ service, builders }: MultiBuilderGridProps) => {
     [service.cardTemplate, service.setCardTemplate] = React.useState(localStorage.getItem(`${service.id}-builder`) || Object.keys(builders)[0]);
@@ -43,5 +43,3 @@ const MultiBuilderGrid = ({ service, builders }: MultiBuilderGridProps) => {
 };
 
 export default MultiBuilderGrid;
-
-

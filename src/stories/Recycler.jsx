@@ -1,6 +1,6 @@
 import './service.css';
 import React from 'react';
-import {  Button, RecyclerList } from '../index';
+import {  ApiService, Button, RecyclerList } from '../index';
 import Utils from '../Utils';
 import PagenationExample from './Recycler/PagenationExample';
 document.documentElement.setAttribute("dir", "rtl");
@@ -33,8 +33,8 @@ return items;
 
 export const Recycler  = () => {
   const service=React.useMemo(()=>{
-    const _service = true
-    ? new PagenationExample()
+    const _service = false
+    ? new ApiService()
     : {
           items: MockItemsGenerator(1_00),
           canFetch: true,
@@ -67,7 +67,7 @@ export const Recycler  = () => {
           </div>
   }
   
-  return <RecyclerList viewedItems={25}  service={service}  itemBuilder={card}  />
+  return <RecyclerList  service={service}  itemBuilder={card}  />
   return (
     <div className='col-center p-lg' >
         <Button 

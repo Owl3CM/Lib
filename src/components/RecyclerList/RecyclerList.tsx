@@ -54,10 +54,10 @@ export default class RecyclerList extends React.Component<IRecycler> {
         itemBuilder,
         nodeBuilder,
         gridClass = "grid",
-        viewedItems = 25,
         containerClass = "wrapper relative hide-scroller",
-        children,
+        viewedItems = 25,
         indecator,
+        children,
     }: IRecycler) {
         super({ service, itemBuilder, nodeBuilder, gridClass, viewedItems, containerClass });
         this.dir = document.documentElement.getAttribute("dir") || "ltr";
@@ -89,16 +89,17 @@ export default class RecyclerList extends React.Component<IRecycler> {
 
         this.grid = document.createElement("div");
         this.grid.className = gridClass;
+        this.grid.append(...service.items.slice(0, this.initItemsToCalculate).map((item: any) => this.buildItem(item)));
         this.initGrid = () => {
-            this.grid.append(...service.items.slice(0, this.viewedItems).map((item: any) => this.buildItem(item)));
+            this.grid.replaceChildren(...service.items.slice(0, this.viewedItems).map((item: any) => this.buildItem(item)));
             this.handleCalculations();
         };
-        this.initGrid();
     }
     componentDidMount() {
         if (!this.useRecycler) return;
         this.container = document.getElementById("recycler");
         this.container.append(this.grid);
+        this.handleCalculations();
         this.initGrid();
         createIndecator(this);
         this.container.addEventListener("scroll", ({ target }: any) => recyclingOnScroll(target, this));

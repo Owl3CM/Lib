@@ -1,6 +1,6 @@
 import "./service.css";
 import React from "react";
-import { ApiService, Grid, PagenationService, PaginationScroller } from "../services";
+import { ApiService, Grid, PagenationService, PaginatedScroller } from "../services";
 import { Button } from "../components";
 
 document.documentElement.setAttribute("dir", "rtl");
@@ -17,7 +17,7 @@ export const Service = () => {
     }, []);
 
     return (
-        <PaginationScroller service={service} useRefresh>
+        <PaginatedScroller service={service} useRefresh>
             <Button
                 onClick={() => {
                     service.search();
@@ -39,6 +39,6 @@ export const Service = () => {
                     );
                 }}
             />
-        </PaginationScroller>
+        </PaginatedScroller>
     );
 };
