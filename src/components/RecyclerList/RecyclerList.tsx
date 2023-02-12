@@ -7,8 +7,15 @@ interface IRecycler {
     viewedItems: number;
     gridClass: string;
     containerClass: string;
+    children?:any;
+    indecator?:IIndecatorProps;
 }
-
+type IIndecatorProps={
+    width:number;
+    backgroundColor:string;
+    borderRadius:number;
+    color:string;
+}
 export default class RecyclerList extends React.Component<IRecycler> {
     useRecycler: boolean;
     service: any;
@@ -27,16 +34,30 @@ export default class RecyclerList extends React.Component<IRecycler> {
     scrollHeight= 0;
     colums= 0;
     lastPointerY= 0;
-    updateIndecator=()=>{};
+    updateIndecatorPostion=()=>{};
     onSwipeIndecator = (e:any) =>{}
     initGrid=()=>{}
+    updateIndecatorProps=()=>{}
+    indecatorAllowdAreay=0
+    dir="ltr"
+    children:any;
+    
+    indecatorProps:IIndecatorProps={
+        width:100,
+        borderRadius:0,
+        color:"#63cfc999",
+        backgroundColor:"#63cfc955",
+    };
 
-    constructor({ service, itemBuilder, nodeBuilder, gridClass = "grid", viewedItems = 25,containerClass="wrapper relative hide-scroller py-5xl" }: IRecycler) {
+    constructor({ service, itemBuilder, nodeBuilder, gridClass = "grid", viewedItems = 25,containerClass="wrapper relative hide-scroller" ,children,indecator}: IRecycler) {
         super({ service, itemBuilder, nodeBuilder, gridClass, viewedItems,containerClass });
+        this.dir=document.documentElement.getAttribute("dir")||"ltr";
         this.useRecycler = localStorage.getItem("useRecycler") !== "Disable Recycler";
         this.service = service;
         this.Card = itemBuilder;
         this.containerClass = containerClass;
+        this.children=children;
+        this.indecatorProps=indecator||this.indecatorProps;
 
         if (!this.useRecycler) return;
 
@@ -59,25 +80,18 @@ export default class RecyclerList extends React.Component<IRecycler> {
 
         this.grid = document.createElement("div");
         this.grid.className = gridClass;
-        this.grid.append(...service.items.slice(0, this.initItemsToCalculate).map((item:any) => this.buildItem(item)));
-
         this.initGrid = () => {
-            this.grid.replaceChildren(...service.items.slice(0, this.initItemsToCalculate).map((item:any) => this.buildItem(item)));
-            this.handleCalculations();
-            this.grid.append(...service.items.slice(this.initItemsToCalculate, this.viewedItems).map((item:any) => this.buildItem(item)));
+            this.grid.append(...service.items.slice(0, this.viewedItems).map((item:any) => this.buildItem(item)));
             this.handleCalculations();
         };
+        this.initGrid();
     }
     componentDidMount() {
         if (!this.useRecycler) return;
         this.container = document.getElementById("recycler");
         this.container.append(this.grid);
-        this.handleCalculations();
-        console.log(this.grid);
-        this.grid.append(...this.service.items.slice(this.initItemsToCalculate, this.viewedItems).map((item:any) => this.buildItem(item)));
-        this.handleCalculations();
-        this.scrollerIndecator = createIndecator(this);
-        this.container.parentElement.append(this.scrollerIndecator);
+        this.initGrid();
+        createIndecator(this);
         this.container.addEventListener("scroll", ({ target }:any) => recyclingOnScroll(target, this));
         window.addEventListener("resize", this.handleCalculations);
     }
@@ -93,10 +107,12 @@ export default class RecyclerList extends React.Component<IRecycler> {
                 {this.useRecycler ? "Disable Recycler" : "Enable Recycler"}
             </p>
             {this.useRecycler ? (
-                <div id="recycler" className={this.containerClass} />
+                <div id="recycler" className={this.containerClass}>
+                    {this.children&&this.children}
+                </div>
             ) : (
                 <div className={this.containerClass}>
-                    <div className="grid" style={{ paddingBottom: "200px" }}>
+                    <div className="grid">
                         {this.service.items.map((item:any,i:any) => (
                             <this.Card key={i} item={item} />
                         ))}
@@ -112,36 +128,31 @@ export default class RecyclerList extends React.Component<IRecycler> {
         this.scrollHeight = this.container.scrollHeight - this.container.offsetHeight;
         this.centerOfContainer = this.scrollHeight / 2;
         this.lastItem = this.viewedItems;
+        setTimeout(this.updateIndecatorProps, 100);
+        
     };
-
-  
 }
-
 const recyclingOnScroll = (target:any, recycler:any) => {
     const scrollDown = target.scrollTop >= recycler.lastScrollTop;
     recycler.lastScrollTop = target.scrollTop;
+    recycler.updateIndecatorPostion();
 
-    recycler.updateIndecator();
-
-    if (target.scrollTop > recycler.centerOfContainer + recycler.threshold) {
-        if (scrollDown) {
-            if (recycler.lastItem + recycler.colums >= recycler.service.items.length) {
-                if (!recycler.service.canFetch) return;
+    if (scrollDown) {
+        if (target.scrollTop > recycler.centerOfContainer + recycler.threshold) {
+            if (recycler.lastItem + recycler.colums < recycler.service.items.length) 
+                {
+                    onScrollDown(recycler);
+                    if (target.scrollTop < target.scrollHeight) setTimeout(() => (target.scrollTop = target.scrollTop-10), 5);
+                }
+            else if (recycler.service.canFetch) 
                 recycler.service.loadMore().then(() => {
+                    recycler.updateIndecatorProps();
                     setTimeout(() => onScrollDown(recycler), 10);
-                    const height = ((40 || recycler.lastItem) / recycler.service.items.length) * 1000;
-                    recycler.scrollerIndecator.style.height = `${height < 40 ? 40 : height}px`;
                 });
-                return;
-            }
-            onScrollDown(recycler);
         }
-    } else if (target.scrollTop < recycler.centerOfContainer - recycler.threshold) {
-        if (!scrollDown) {
-            if (recycler.lastItem <= recycler.viewedItems) return;
-            onScrollUp(recycler);
-            if (target.scrollTop < 1) setTimeout(() => (target.scrollTop = 10), 5);
-        }
+    } else if (target.scrollTop < recycler.centerOfContainer - recycler.threshold && recycler.lastItem > recycler.viewedItems) {
+        onScrollUp(recycler);
+        if (target.scrollTop < 1) setTimeout(() => (target.scrollTop = 10), 5);
     }
 };
 
@@ -150,7 +161,7 @@ const onScrollDown = (recycler:any) => {
     recycler.lastItem += recycler.colums;
     let array = recycler.service.items.slice(start, recycler.lastItem);
     for (let i = 0; i < array.length; i++) {
-        let itemNode = recycler.buildItem({ item: array[i], setItem: recycler.service.setItem });
+        let itemNode = recycler.buildItem( array[i]);
         recycler.grid.firstChild.remove();
         recycler.grid.append(itemNode);
     }
@@ -162,28 +173,47 @@ const onScrollUp = (recycler:any) => {
     let start = end + recycler.colums;
     let array = recycler.service.items.slice(end, start);
     for (let i = array.length - 1; i > -1; i--) {
-        let itemNode = recycler.buildItem({ item: array[i], setItem: recycler.service.setItem });
+        let itemNode = recycler.buildItem( array[i]);
         recycler.grid.lastChild.remove();
         recycler.grid.prepend(itemNode);
     }
 };
 
 const createIndecator = (recycler:any) => {
+    const indecatorContainer = document.createElement("div");
+    indecatorContainer.style.height = `${recycler.container.offsetHeight}px`;
+    indecatorContainer.style.position = "relative";
+    indecatorContainer.style.backgroundColor = recycler.indecatorProps.backgroundColor;
+
     const scrollerIndecator = document.createElement("p");
     scrollerIndecator.className = "scroller-indecator";
-    const height = ((40 || recycler.lastItem) / recycler.service.items.length) * 1000;
-    scrollerIndecator.style.height = `${height < 40 ? 40 : height}px`;
-    recycler.updateIndecator = () => {
-        scrollerIndecator.style.top = `${
-            ((recycler.lastItem - recycler.viewedItems + recycler.colums) / recycler.service.items.length) * recycler.container.offsetHeight
-        }px`;
+    scrollerIndecator.style.backgroundColor = recycler.indecatorProps.color;
+
+    recycler.updateIndecatorPostion = () => {
+            scrollerIndecator.style.top = `${(recycler.lastItem / recycler.service.items.length) * recycler.indecatorAllowdAreay}px`;
     };
+    recycler.updateIndecatorProps=()=>{
+        if(!recycler.lastItem || !recycler.service.items.length) {
+            console.log("no items")
+            scrollerIndecator.style.height = `0px`;
+            recycler.indecatorAllowdAreay= recycler.container.offsetHeight 
+            recycler.updateIndecatorPostion()
+            return;
+        }
+        const height = (80 / recycler.service.items.length) * 1000;
+        console.log("items",{height,lastItem:recycler.lastItem ,items: recycler.service.items.length})
+        scrollerIndecator.style.height = `${height < 20 ? 20 : height}px`;
+        recycler.indecatorAllowdAreay= recycler.container.offsetHeight - height
+        recycler.updateIndecatorPostion()
+    }
+    setTimeout(recycler.updateIndecatorProps, 100);
+
     recycler.onSwipeIndecator = (e:any) => {
+        const lastIndex = Math.floor((e.clientY / recycler.container.offsetHeight) * recycler.service.items.length)
+        if (lastIndex <= recycler.viewedItems || lastIndex > recycler.service.items.length) return;
         const scrollDown = e.clientY > recycler.lastPointerY;
         recycler.lastPointerY = e.clientY;
-        const lastIndex = (e.clientY / recycler.container.offsetHeight) * recycler.service.items.length;
-        if (lastIndex < recycler.viewedItems || lastIndex > recycler.service.items.length) return;
-        recycler.lastItem = lastIndex - (lastIndex % recycler.colums);
+        recycler.lastItem = (lastIndex);
         if (scrollDown) {
             onScrollDown(recycler);
             recycler.container.scrollTop = recycler.scrollHeight;
@@ -191,13 +221,17 @@ const createIndecator = (recycler:any) => {
             onScrollUp(recycler);
             recycler.container.scrollTop = 0;
         }
-        recycler.updateIndecator();
+        recycler.updateIndecatorPostion();
     };
 
     scrollerIndecator.addEventListener("mousedown", (e) => {
         recycler.lastPointerY = e.clientY;
+        scrollerIndecator.style.transition = "unset";
         const mouseUp = () => {
-            console.log(recycler.lastItem);
+            scrollerIndecator.style.transition = "top 0.1s linear";
+            console.log({result:recycler.lastItem - recycler.viewedItems,lastItem: recycler.lastItem,viewedItems:recycler.viewedItems});
+            if(recycler.lastItem - recycler.viewedItems<0) recycler.lastItem=recycler.viewedItems;
+            else if(recycler.lastItem > recycler.service.items.length) recycler.lastItem=recycler.service.items.length;
             recycler.grid.replaceChildren(
                 ...recycler.service.items.slice(recycler.lastItem - recycler.viewedItems, recycler.lastItem).map((item:any) => recycler.buildItem(item))
             );
@@ -208,8 +242,20 @@ const createIndecator = (recycler:any) => {
         window.addEventListener("mousemove", recycler.onSwipeIndecator);
         window.addEventListener("mouseup", mouseUp);
     });
+    
+    const parent=recycler.container.parentElement;
 
-    return scrollerIndecator;
+    indecatorContainer.append(scrollerIndecator);
+    parent.style.display="grid"
+    if(recycler.dir==="ltr") {
+        parent.style.gridTemplateColumns="10px 1fr"
+        parent.prepend(indecatorContainer);
+    }
+    else {
+        parent.style.gridTemplateColumns="1fr 10px"
+        parent.append(indecatorContainer);
+    }
+    recycler.scrollerIndecator= scrollerIndecator;
 };
 
 // const observe = new IntersectionObserver(

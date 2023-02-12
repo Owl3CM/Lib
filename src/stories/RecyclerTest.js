@@ -2,7 +2,6 @@ import React from "react";
 // import RecyclerGrid, { RecyclerScroller } from "../Lib/ServiceProvider/Nodes/RecyclerScroller";
 import Utils from "../../Utils";
 import { RecyclerList } from "../components";
-
 const MockItemsGenerator = (count, items = []) => {
     count += items.length;
     const generateWords = (count) => {
@@ -33,7 +32,7 @@ const RecyclerTest = () => {
         const _service = fromApi
             ? new PagenationService()
             : {
-                  items: MockItemsGenerator(1_00),
+                  items: MockItemsGenerator(4_00),
                   canFetch: true,
                   loadMore: async () => {
                       service.canFetch = false;
@@ -41,7 +40,7 @@ const RecyclerTest = () => {
                       await Utils.sleep(500);
                       service.items = MockItemsGenerator(25, service.items);
                       console.log("loaded");
-                      service.canFetch = true;
+                      //   service.canFetch = true;
                       return true;
                   },
                   search: () => {

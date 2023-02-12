@@ -3,8 +3,9 @@ import React from 'react';
 import {  Button, RecyclerList } from '../index';
 import Utils from '../Utils';
 import PagenationExample from './Recycler/PagenationExample';
+document.documentElement.setAttribute("dir", "rtl");
+document.documentElement.className="dark"
 
-document.body.className="dark"
 const MockItemsGenerator = (count, items = []) => {
 count += items.length;
 const generateWords = (count) => {
