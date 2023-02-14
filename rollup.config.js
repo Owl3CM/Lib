@@ -5,7 +5,8 @@ const postcss = require("rollup-plugin-postcss");
 const dts = require("rollup-plugin-dts").default;
 const babel = require("@rollup/plugin-babel").default;
 const pkg = require("./package.json");
-
+const { terser } = require("rollup-plugin-terser");
+const peerDepsExternal = require("rollup-plugin-peer-deps-external");
 module.exports = [
     {
         input: "src/index.ts",
@@ -22,6 +23,7 @@ module.exports = [
             },
         ],
         plugins: [
+            peerDepsExternal(),
             babel({
                 presets: ["@babel/preset-react"],
             }),
@@ -31,6 +33,7 @@ module.exports = [
             commonjs(),
             typescript({ tsconfig: "./tsconfig.json" }),
             postcss({ extract: true }),
+            terser(),
         ],
     },
     {
